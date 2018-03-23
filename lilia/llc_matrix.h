@@ -82,6 +82,12 @@ namespace llc
 		//	,	fpVec.x * _13 + fpVec.y * _23 + fpVec.z * _33
 		//	};
 		//}
+							void				Viewport					(const ::llc::SCoord2<uint32_t> & offscreenMetrics, double fFar, double fNear)			noexcept	{
+			_11 = (_tBase)(2.0 / offscreenMetrics.x);	_12 =										_13 =												_14 = 
+			_21 = (_tBase)0;							_22 = (_tBase)(2.0 / offscreenMetrics.y);	_23 =												_24 = 
+			_31 =										_32 = (_tBase)0;							_33 = (_tBase)(1.0f / (fFar - fNear));				_34 = 
+			_41 =										_42 = (_tBase)0;							_43 = (_tBase)(-fNear * (1.0f / (fFar - fNear)));	_44 = (_tBase)1;
+		}
 							void				Identity					()																						noexcept	{
 			*this									= 
 				{ (_tBase)1,  (_tBase)0,  (_tBase)0,  (_tBase)0
@@ -95,7 +101,6 @@ namespace llc
 			_11 = (_tBase)1;	_12 =							_13 = 
 			_31 = (_tBase)0;	_32 = -(_tBase)angleSinCos.Sin;	_33 = (_tBase)angleSinCos.Cos;
 			_21 = (_tBase)0;	_22 =  (_tBase)angleSinCos.Cos;	_23 = (_tBase)angleSinCos.Sin;
-			// 
 			_41 = _42 = _43 = _14 = _24 = _34 = (_tBase)0; _44 = (_tBase)1;
 		}
 							void				RotationY					(double angle)																			noexcept	{	
@@ -155,9 +160,9 @@ namespace llc
 			_11 = R.x;	_12 = U.x;	_13 = F.x;	_14 = (_tBase)0;
 			_21 = R.y;	_22 = U.y;	_23 = F.y;	_24 = (_tBase)0;
 			_31 = R.z;	_32 = U.z;	_33 = F.z;	_34 = (_tBase)0;
-			_41 = (_tBase)-vPosition.Dot( R ); 	// x
-			_42 = (_tBase)-vPosition.Dot( U ); 	// y
-			_43 = (_tBase)-vPosition.Dot( F );	// z
+			_41 = (_tBase)-vPosition.Dot(R); 	// x
+			_42 = (_tBase)-vPosition.Dot(U); 	// y
+			_43 = (_tBase)-vPosition.Dot(F);	// z
 			_44 = (_tBase)1;
 		}
 
@@ -166,7 +171,7 @@ namespace llc
 			_21 = vRight.y;	_22 = vUp.y; _23 = vFront.y; _24 = (_tBase)0;
 			_31 = vRight.z;	_32 = vUp.z; _33 = vFront.z; _34 = (_tBase)0;
 			_41 = (_tBase)-vPosition.Dot(vRight	);	
-			_42 = (_tBase)-vPosition.Dot(vUp		);	
+			_42 = (_tBase)-vPosition.Dot(vUp	);	
 			_43 = (_tBase)-vPosition.Dot(vFront	);	
 			_44 = (_tBase)1;
 		}
@@ -175,12 +180,9 @@ namespace llc
 				,										vRight
 				; 
 			double										fAngle						= vWorldUp.Dot(vDir);
-
 			vUp										= vWorldUp - vDir * fAngle;
 			vUp.Normalize();
-
 			vRight									= vUp.Cross( vDir );
-
 			_11 = vRight.x;	_12 = vRight.y;	_13 = vRight.z;	_14=(_tBase)0; 
 			_21 = vUp.x; 	_22 = vUp.y; 	_23 = vUp.z; 	_24=(_tBase)0; 
 			_31 = vDir.x;	_32 = vDir.y;	_33 = vDir.z;	_34=(_tBase)0; 
