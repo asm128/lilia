@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="container">
+      <UniqueIdentifier>{ce9a994d-5b8d-457d-9200-120d400350f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="raster">
+      <UniqueIdentifier>{4af1ed5f-f2fd-43d8-946d-c5ff434de73a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime">
+      <UniqueIdentifier>{238a39fb-d947-415e-980b-c1ef977cee58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pointer">
+      <UniqueIdentifier>{3fc2a0de-914a-4be2-8f9d-37c7abc16dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="display">
+      <UniqueIdentifier>{a42367d1-7d77-4311-a11e-61e84f0b4af7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="time">
+      <UniqueIdentifier>{525b3a0d-4d27-420f-bffd-801c1051b894}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{15816c47-b07f-40b9-97c1-8378769c60fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{eb8a0fae-5099-41f0-87b3-24759fa90110}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="llc_matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_coord.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_math.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_frameinfo.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_timer.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_app_impl.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_framework.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_runtime.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_color.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_bitmap_target.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_ascii_target.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_ascii_color.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_bit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_bitmap_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_truetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_gui.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_ascii_display.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_display.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_array.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_array_static.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_array_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_bit_array_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_grid.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_grid_copy.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_grid_scale.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_grid_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_layered_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_ptr.h">
+      <Filter>pointer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="llc_timer.cpp">
+      <Filter>time</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_bitmap_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_framework.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_ascii_target.cpp">
+      <Filter>raster</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_gui.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_ascii_display.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_display.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
