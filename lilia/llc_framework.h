@@ -18,7 +18,7 @@ namespace llc
 							::llc::SInput										Input										= {};
 							::llc::STimer										Timer										= {};
 							::llc::SFrameInfo									FrameInfo									= {};
-							TOffscreen											Offscreen									= {};
+							::llc::STexture<::llc::SColorBGRA>					Offscreen									= {};
 
 																				SFramework									(::llc::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
 	}; // struct

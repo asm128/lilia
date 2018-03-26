@@ -1,5 +1,6 @@
 #include "llc_array.h"
-#include "llc_coord.h"
+#include "llc_matrix.h"
+
 
 #ifndef LLC_GEOMETRY_H
 #define LLC_GEOMETRY_H
@@ -16,6 +17,16 @@ namespace llc
 					::llc::SCoord3		<float>							Scale										;
 					::llc::SQuaternion	<float>							Orientation									;
 					::llc::SCoord3		<float>							Position									;
+	};
+
+	struct SModelTransform {
+					::llc::SMatrix4<float>								World										;
+					::llc::SMatrix4<float>								WorldInverse								;
+	};
+
+	struct SModelBase {
+					::llc::SModelGeometry								Geometry									= {};
+					::llc::SModelPivot									Pivot										= {};
 	};
 
 	// --- Geometry generation: Cube.

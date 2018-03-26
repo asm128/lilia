@@ -6,6 +6,7 @@
 
 namespace llc 
 {
+#pragma pack(push, 1)
 	template<typename _tBase>
 	struct SMatrix4 {
 		typedef				SMatrix4<_tBase>	_tMat4;
@@ -453,7 +454,7 @@ namespace llc
 		triangle.C															= transform.Transform(triangle.C);
 		return triangle;
 	}
-
+#pragma pack(pop)
 }
 
 #endif // LLC_MATRIX_H_298374982374

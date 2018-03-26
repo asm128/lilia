@@ -8,7 +8,7 @@ namespace llc
 {
 	struct SInputMouse {
 							::llc::SCoord2<int32_t>					Position									= {};
-							::llc::SCoord2<int32_t>					Deltas										= {};
+							::llc::SCoord3<int32_t>					Deltas										= {};
 							uint8_t									ButtonState			[32]					= {};
 							double									ButtonTime			[32]					= {};
 							int64_t									ButtonStrength		[32]					= {};

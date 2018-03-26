@@ -57,7 +57,7 @@ static						::llc::error_t		updateGUIControlHovered			(::llc::SControlState& con
 }
 
 ::llc::error_t									llc::guiUpdate					(::llc::SGUI& GUISystem, const ::llc::SInput& inputSystem)										{ 
-	::llc::SCoord2<int32_t>								mousePos						= GUISystem.MousePosition = inputSystem.MouseCurrent.Position;
+	const ::llc::SCoord2<int32_t>						& mousePos						= GUISystem.MousePosition = inputSystem.MouseCurrent.Position;
 	::llc::SControlPropertyTable						& controlsIdle					= GUISystem.Properties[::llc::CONTROL_STATE_Idle];
 	::llc::array_pod<::llc::SControlState>				& controlsState					= GUISystem.Controls;
 	for(uint32_t iControl=0; iControl < controlsState.size(); ++iControl) {
