@@ -1,7 +1,7 @@
 #include "llc_geometry.h"
 
 // Vertex coordinates for cube faces
-static constexpr const ::llc::STriangle3D<float>	geometryCubePositions	[12]						= 
+static constexpr const ::llc::STriangle3D<float>					geometryCubePositions	[12]						= 
 	{ {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}	// Right	- first		
 	, {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}}	// Right	- second	
 
@@ -21,7 +21,7 @@ static constexpr const ::llc::STriangle3D<float>	geometryCubePositions	[12]					
 	, {{1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}}	// Top		- second
 	};
 
-static constexpr	const ::llc::SCoord3<float>		geometryCubeNormals	[12]						= 
+static constexpr	const ::llc::SCoord3<float>						geometryCubeNormals		[12]						= 
 	{ {0.0f, 0.0f, -1.0f}	// Right	- first			
 	, {0.0f, 0.0f, -1.0f}	// Right	- second		
 
@@ -42,7 +42,7 @@ static constexpr	const ::llc::SCoord3<float>		geometryCubeNormals	[12]						=
 	};
 
 // Vertex coordinates for cube faces
-static constexpr	const ::llc::STriangle2D<float>					geometryCubeUV	[12]						= 
+static constexpr	const ::llc::STriangle2D<float>					geometryCubeUV			[12]						= 
 	{ {{1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 1.0f}}	// Right	- first			?? I have no idea if this is correct lol
 	, {{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}}	// Right	- second	
 
@@ -62,9 +62,9 @@ static constexpr	const ::llc::STriangle2D<float>					geometryCubeUV	[12]						=
 	, {{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}}	// Top		- second
 	};
 
-					::llc::error_t					llc::generateCubePositions					(::llc::array_pod<::llc::STriangle3D<float>>& out_Positions	)	{ out_Positions = geometryCubePositions; return 0; }
-					::llc::error_t					llc::generateCubeNormals					(::llc::array_pod<::llc::SCoord3<float>>& out_Normals	)		{ out_Normals = geometryCubeNormals; return 0; }
-					::llc::error_t					llc::generateCubeUV							(::llc::array_pod<::llc::STriangle2D<float>>& out_UV		)	{ out_UV = geometryCubeUV; return 0; }
+					::llc::error_t					llc::generateCubePositions					(::llc::array_pod<::llc::STriangle3D<float>>& out_Positions	) { out_Positions	= geometryCubePositions	; return 0; }
+					::llc::error_t					llc::generateCubeNormals					(::llc::array_pod<::llc::SCoord3	<float>>& out_Normals	) { out_Normals		= geometryCubeNormals	; return 0; }
+					::llc::error_t					llc::generateCubeUV							(::llc::array_pod<::llc::STriangle2D<float>>& out_UV		) { out_UV			= geometryCubeUV		; return 0; }
 					::llc::error_t					llc::generateCubeGeometry					
 	( ::llc::array_pod<::llc::STriangle3D	<float>> & out_Positions	
 	, ::llc::array_pod<::llc::SCoord3		<float>> & out_Normals
