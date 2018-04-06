@@ -7,26 +7,51 @@
 
 namespace llc 
 {
+	//template <typename _tUnit>
+	//struct SGeometryGrid {
+	//				::llc::SCoord3<_tUnit>								Normal										;
+	//				::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
+	//				::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
+	//};
+
+	//template <typename _tUnit>
+	//struct SGeometryBox {
+	//				::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
+	//				::llc::array_pod<::llc::SCoord3		<_tUnit>>		Normals										;
+	//				::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
+	//};
+
+	//template <typename _tUnit>
+	//struct SGeometryPolyhedron {
+	//				::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
+	//				::llc::array_pod<::llc::SCoord3		<_tUnit>>		Normals										;
+	//				::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
+	//};
+
+	template <typename _tUnit>
 	struct SModelGeometry {
-					::llc::array_pod<::llc::STriangle3D	<float>>		Positions									;
-					::llc::array_pod<::llc::SCoord3		<float>>		Normals										;
-					::llc::array_pod<::llc::STriangle2D	<float>>		UVs											;
+					::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
+					::llc::array_pod<::llc::SCoord3		<_tUnit>>		Normals										;
+					::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
 	};
 
+	template <typename _tUnit>
 	struct SModelPivot {
-					::llc::SCoord3		<float>							Scale										;
-					::llc::SQuaternion	<float>							Orientation									;
-					::llc::SCoord3		<float>							Position									;
+					::llc::SCoord3		<_tUnit>						Scale										;
+					::llc::SQuaternion	<_tUnit>						Orientation									;
+					::llc::SCoord3		<_tUnit>						Position									;
 	};
 
+	template <typename _tUnit>
 	struct SModelTransform {
-					::llc::SMatrix4<float>								World										;
-					::llc::SMatrix4<float>								WorldInverse								;
+					::llc::SMatrix4		<_tUnit>						World										;
+					::llc::SMatrix4		<_tUnit>						WorldInverse								;
 	};
 
+	template <typename _tUnit>
 	struct SModelBase {
-					::llc::SModelGeometry								Geometry									= {};
-					::llc::SModelPivot									Pivot										= {};
+					::llc::SModelGeometry	<_tUnit>					Geometry									= {};
+					::llc::SModelPivot		<_tUnit>					Pivot										= {};
 	};
 
 	// --- Geometry generation: Cube.

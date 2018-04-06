@@ -30,6 +30,7 @@
     <ClInclude Include="llc_bitmap_file.h" />
     <ClInclude Include="llc_bitmap_target.h" />
     <ClInclude Include="llc_bit_array_view.h" />
+    <ClInclude Include="llc_camera.h" />
     <ClInclude Include="llc_collision.h" />
     <ClInclude Include="llc_color.h" />
     <ClInclude Include="llc_coord.h" />
@@ -50,6 +51,7 @@
     <ClInclude Include="llc_particle.h" />
     <ClInclude Include="llc_ptr.h" />
     <ClInclude Include="llc_runtime.h" />
+    <ClInclude Include="llc_scene.h" />
     <ClInclude Include="llc_texture.h" />
     <ClInclude Include="llc_timer.h" />
     <ClInclude Include="llc_truetype.h" />

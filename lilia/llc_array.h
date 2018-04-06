@@ -8,7 +8,11 @@
 namespace llc 
 {
 	template <typename... _Args>	void			clear	(_Args&&... args)						{ const int32_t results[] = {args.clear		()			..., 0}; }
-	template <typename... _Args>	void			resize	(uint32_t newSize, _Args&&... args)		{ const int32_t results[] = {args.resize	(newSize)	..., 0}; }
+	template <typename... _Args>	::llc::error_t	resize	(uint32_t newSize, _Args&&... args)		{ const int32_t results[] = {args.resize	(newSize)	..., 0}; 
+		for(uint32_t i=0; i < ::llc::size(results); ++i)
+			ree_if(errored(results[i]), "Failed to set size: %i. Out of memory?", (int32_t)newSize);
+		return 0; 
+	}
 
 	// Base for arrays that keeps track of its actual size.
 	template<typename _tCell>
