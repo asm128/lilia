@@ -62,10 +62,10 @@ static constexpr	const ::llc::STriangle2D<float>					geometryCubeUV			[12]						
 	, {{1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}}	// Top		- second
 	};
 
-					::llc::error_t					llc::generateCubePositions					(::llc::array_pod<::llc::STriangle3D<float>>& out_Positions	) { out_Positions	= geometryCubePositions	; return 0; }
-					::llc::error_t					llc::generateCubeNormals					(::llc::array_pod<::llc::SCoord3	<float>>& out_Normals	) { out_Normals		= geometryCubeNormals	; return 0; }
-					::llc::error_t					llc::generateCubeUV							(::llc::array_pod<::llc::STriangle2D<float>>& out_UV		) { out_UV			= geometryCubeUV		; return 0; }
-					::llc::error_t					llc::generateCubeGeometry					
+					::llc::error_t									llc::generateCubePositions							(::llc::array_pod<::llc::STriangle3D<float>>& out_Positions	) { out_Positions	= geometryCubePositions	; return 0; }
+					::llc::error_t									llc::generateCubeNormals							(::llc::array_pod<::llc::SCoord3	<float>>& out_Normals	) { out_Normals		= geometryCubeNormals	; return 0; }
+					::llc::error_t									llc::generateCubeUV									(::llc::array_pod<::llc::STriangle2D<float>>& out_UV		) { out_UV			= geometryCubeUV		; return 0; }
+					::llc::error_t									llc::generateCubeGeometry					
 	( ::llc::array_pod<::llc::STriangle3D	<float>> & out_Positions	
 	, ::llc::array_pod<::llc::SCoord3		<float>> & out_Normals
 	, ::llc::array_pod<::llc::STriangle2D	<float>> & out_UV

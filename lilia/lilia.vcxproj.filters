@@ -138,6 +138,9 @@
     <ClInclude Include="llc_ptr.h">
       <Filter>pointer</Filter>
     </ClInclude>
+    <ClInclude Include="llc_gui_text.h">
+      <Filter>gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="llc_timer.cpp">
@@ -163,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="llc_display.cpp">
       <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_gui_text.cpp">
+      <Filter>gui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

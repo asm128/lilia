@@ -49,12 +49,10 @@ struct SHeaderInfoBMP {
 	SHeaderFileBMP																							& fileHeader								= *(SHeaderFileBMP*)*source;	
 	ree_if(0 != memcmp(fileHeader.Type, "BM", 2), "Invalid magic number for BMP file.");	
 	SHeaderInfoBMP																							& infoHeader								= *(SHeaderInfoBMP*)*(source + sizeof(SHeaderFileBMP));
-
 	ree_if(infoHeader.Bpp != 24
 		&& infoHeader.Bpp != 32
 		&& infoHeader.Bpp != 8
 		, "Unsupported bitmap format! Only 8, 24 and 32-bit bitmaps are supported.");	
-
 	uint32_t																								nPixelCount									= infoHeader.Width * infoHeader.Height;
 	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.Width, infoHeader.Height );	// make sure it contains data 
 	out_Colors.resize(nPixelCount);
@@ -102,7 +100,7 @@ struct SHeaderInfoBMP {
 	ree_if(fread(&fileHeader, 1, sizeof(::SHeaderFileBMP), source) != sizeof(::SHeaderFileBMP), "Failed to read file! File corrupt?");
 	ree_if(fread(&infoHeader, 1, sizeof(::SHeaderInfoBMP), source) != sizeof(::SHeaderInfoBMP), "Failed to read file! File corrupt?");
 	uint32_t																								nPixelCount									= infoHeader.Width * infoHeader.Height;
-	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.Width, infoHeader.Height );	// make sure it contains data 
+	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.Width, infoHeader.Height);	// make sure it contains data 
 	ree_if(infoHeader.Compression != BI_RGB, "Unsupported bmp compression!");
 	ree_if(infoHeader.Bpp != 24
 		&& infoHeader.Bpp != 32
@@ -171,19 +169,20 @@ struct SHeaderInfoBMP {
 	uint32_t																								sizeRead									= (uint32_t)(out_ImageView.size() * sizeof(::llc::SColorBGRA) + sizeof(uint32_t) + sizeof(uint32_t));
 	uint32_t																								elementSize									= 0;  fread(&elementSize, sizeof(uint32_t					), 1, source);
 	::llc::SCoord2<uint32_t>																				gridMetrics									= {}; fread(&gridMetrics, sizeof(::llc::SCoord2<uint32_t>	), 1, source);
-	out_Colors.resize(gridMetrics.x * gridMetrics.y);
-	fread(out_Colors.begin(), elementSize, out_Colors.size(), source);
+	llc_necall(out_Colors.resize(gridMetrics.x * gridMetrics.y), "Out of memory");
+	ree_if(out_Colors.size() != fread(out_Colors.begin(), ::llc::min(elementSize, (uint32_t)sizeof(::llc::SColorBGRA)), out_Colors.size(), source), "Corrupt file?");
 	out_ImageView																						= {out_Colors.begin(), gridMetrics};
 	return sizeRead; 
 }
+
 					::llc::error_t																	llc::bmgFileLoad							(const byte_t					* source		, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView)	{ 
 	ree_if(0 == source, "Invalid function usage: source cannot be NULL.");
 	uint32_t																								sizeRead									= (uint32_t)(sizeof(uint32_t) + sizeof(uint32_t));
 	uint32_t																								& elementSize								= *(uint32_t*)source;
 	::llc::SCoord2<uint32_t>																				& gridMetrics								= *(::llc::SCoord2<uint32_t>*)(source + sizeof(uint32_t));
 	::llc::SColorBGRA																						* elementGrid								= (::llc::SColorBGRA*)(source + sizeof(uint32_t) + sizeof(::llc::SCoord2<uint32_t>));
-	out_Colors.resize(gridMetrics.x * gridMetrics.y);
-	memcpy(out_Colors.begin(), elementGrid, out_Colors.size() * elementSize);
+	llc_necall(out_Colors.resize(gridMetrics.x * gridMetrics.y), "Out of memory");
+	memcpy(out_Colors.begin(), elementGrid, out_Colors.size() * ::llc::min(elementSize, (uint32_t)sizeof(::llc::SColorBGRA)));
 	out_ImageView																						= {out_Colors.begin(), gridMetrics};
 	return sizeRead + out_Colors.size(); 
 }
@@ -240,5 +239,4 @@ struct SHeaderInfoBMP {
 	}
 	fclose(source);
 	return 0; 
-
 }

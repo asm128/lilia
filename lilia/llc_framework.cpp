@@ -22,6 +22,8 @@
 	error_if(errored(::llc::displayPresentTarget(mainWindow, offscreen.View)), "Unknown error.");
 #if defined(LLC_WINDOWS)
 	Sleep(1);
+#elif defined(LLC_ANDROID)
+	Sleep_Para_Android(1);
 #endif
 	return 0;
 }

@@ -157,12 +157,12 @@ namespace llc
 			const ::llc::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
 			int																			w0											= ::llc::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int																			w2											= ::llc::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if(w0 < 0)
 				continue;
-			int																			w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
 			if(w1 < 0)
 				continue;
-			int																			w2											= ::llc::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if(w2 < 0)
 				continue;
 			//if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
@@ -184,12 +184,39 @@ namespace llc
 			const ::llc::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
 			int																			w0											= ::llc::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int																			w2											= ::llc::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if(w0 < 0)
 				continue;
-			int																			w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
 			if(w1 < 0)
 				continue;
+			if(w2 < 0)
+				continue;
+			//if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
+			out_Points.push_back({x, y});
+			++pixelsDrawn;
+			//}
+		}
+		return pixelsDrawn;
+	}
+
+	template<typename _tCoord>
+	static					::llc::error_t									drawTriangle								(const ::llc::SCoord2<uint32_t>& targetMetrics, const ::llc::STriangle3D<_tCoord>& triangle, ::llc::array_pod<::llc::SCoord2<int32_t>>& out_Points)		{
+		::llc::SCoord2	<int32_t>													areaMin										= {(int32_t)::llc::min(::llc::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::llc::min(::llc::min(triangle.A.y, triangle.B.y), triangle.C.y)};
+		::llc::SCoord2	<int32_t>													areaMax										= {(int32_t)::llc::max(::llc::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::llc::max(::llc::max(triangle.A.y, triangle.B.y), triangle.C.y)};
+		const int32_t																xStop										= ::llc::min(areaMax.x, (int32_t)targetMetrics.x);
+		int32_t																		pixelsDrawn									= 0;
+		for(int32_t y = ::llc::max(areaMin.y, 0), yStop = ::llc::min(areaMax.y, (int32_t)targetMetrics.y); y < yStop; ++y)
+		for(int32_t x = ::llc::max(areaMin.x, 0); x < xStop; ++x) {	
+			const ::llc::SCoord2<int32_t>												cellCurrent									= {x, y};
+			// Determine barycentric coordinates
+			int																			w0											= ::llc::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
 			int																			w2											= ::llc::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
+			if(w0 < 0)
+				continue;
+			if(w1 < 0)
+				continue;
 			if(w2 < 0)
 				continue;
 			//if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.

@@ -58,6 +58,8 @@ namespace llc
 							::std::string										Text									= {};
 							::std::string										Tooltip									= {};
 							::llc::SRectangle2D<int32_t>						Area									= {};
+							::llc::SRectangle2D<int32_t>						AreaControl								= {};
+							::llc::SRectangle2D<int32_t>						AreaText								= {};
 							::llc::SRectangle2D<int32_t>						AreaRealigned							= {};
 							::llc::SCoord2<int32_t>								Center									= {};
 							::llc::SGUIColorSurface								ColorSurface							= {};

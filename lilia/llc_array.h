@@ -114,10 +114,10 @@ namespace llc
 		}
 
 		// This method doesn't call destructors of the contained PODs.
-		inline				int32_t						clear										()																			noexcept	{ return Count = 0; }
+		inline				::llc::error_t				clear										()																			noexcept	{ return Count = 0; }
 
 		// Returns the new size of the array
-		inline				int32_t						pop_back									(_tPOD* oldValue)																		{ 
+		inline				::llc::error_t				pop_back									(_tPOD* oldValue)																		{ 
 			ree_if(0 == Count, "%s", "Cannot pop elements of an empty array."); 
 			--Count;
 			safe_podcpy(oldValue, &Data[Count]); 
@@ -125,7 +125,7 @@ namespace llc
 		}
 
 		// Returns the index of the pushed value or -1 on failure
-							int32_t						push_back									(const _tPOD& newValue)																	{ 
+							::llc::error_t				push_back									(const _tPOD& newValue)																	{ 
 			const int32_t										indexExpected								= Count;
 			const int32_t										indexNew									= resize(Count+1, newValue)-1; 
 			ree_if(indexNew != indexExpected, "Failed to push value! Array size: %i.", indexExpected);
@@ -134,8 +134,8 @@ namespace llc
 
 		// Returns the index of the pushed value
 		template<size_t _Length>
-		inline				int32_t						append										(const _tPOD (&newChain)[_Length])														{ return append(newChain, _Length);		}
-							int32_t						append										(const _tPOD* chainToAppend, uint32_t chainLength)										{ 
+		inline				::llc::error_t				append										(const _tPOD (&newChain)[_Length])														{ return append(newChain, _Length);		}
+							::llc::error_t				append										(const _tPOD* chainToAppend, uint32_t chainLength)										{ 
 			const uint32_t										startIndex									= Count;
 			const uint32_t										requestedSize								= Count + chainLength; 
 			ree_if(requestedSize < Count, "Size overflow. Cannot append chain.");
@@ -148,7 +148,7 @@ namespace llc
 		}
 
 		// Returns the new size of the array.
-							int32_t						resize										(uint32_t newSize, const _tPOD& newValue)												{ 
+							::llc::error_t				resize										(uint32_t newSize, const _tPOD& newValue)												{ 
 			int32_t												oldCount									= (int32_t)Count;
 			int32_t												newCount									= resize(newSize);
 			ree_if(newCount != (int32_t)newSize, "Failed to resize array. Requested size: %u. Current size: %u (%u).", newCount, Count, Size);
@@ -158,7 +158,7 @@ namespace llc
 		}
 
 		// Returns the new size of the array.
-							int32_t						resize										(uint32_t newSize)																		{ 
+							::llc::error_t				resize										(uint32_t newSize)																		{ 
 			const uint32_t										oldCount									= Count;
 			if(newSize >= Size) {
 				_tPOD												* oldData									= Data;
@@ -189,10 +189,9 @@ namespace llc
 		}
 
 		// returns the new size of the list or -1 on failure.
-							int32_t						insert										(uint32_t index, const _tPOD& newValue)													{ 
+							::llc::error_t				insert										(uint32_t index, const _tPOD& newValue)													{ 
 			ree_if(index >= Count, "Invalid index: %u.", index);
-
-			if(Size < Count+1) {
+			if(Size < Count + 1) {
 				_tPOD												* oldData									= Data;
 				uint32_t											reserveSize									= calc_reserve_size(Count + 1);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
@@ -223,7 +222,7 @@ namespace llc
 		}
 
 		// returns the new size of the list or -1 on failure.
-							int32_t						insert										(uint32_t index, const _tPOD* chainToInsert, uint32_t chainLength)						{
+							::llc::error_t				insert										(uint32_t index, const _tPOD* chainToInsert, uint32_t chainLength)						{
 			ree_if(index >= Count, "Invalid index: %u.", index);
 
 			if(Size < Count + chainLength) {
@@ -249,10 +248,10 @@ namespace llc
 		}
 
 		template<size_t _chainLength>
-		inline				int32_t						insert										(uint32_t index, const _tPOD* (&chainToInsert)[_chainLength])							{ return insert(index, chainToInsert, _chainLength); }
+		inline				::llc::error_t				insert										(uint32_t index, const _tPOD* (&chainToInsert)[_chainLength])							{ return insert(index, chainToInsert, _chainLength); }
 
 		// Returns the new size of the list or -1 if the array pointer is not initialized.
-							int32_t						remove_unordered							(uint32_t index)																		{ 
+							::llc::error_t				remove_unordered							(uint32_t index)																		{ 
 			ree_if(0 == Data, "%s", "Uninitialized array pointer!");
 			ree_if(index >= Count, "Invalid index: %u.", index);
 			Data[index]										= Data[--Count];
@@ -261,7 +260,7 @@ namespace llc
 
 		// returns the new array size or -1 if failed.
 		template<typename _tObj>
-							int32_t						erase										(const _tObj* address)																	{ 
+							::llc::error_t				erase										(const _tObj* address)																	{ 
 			ree_if(0 == Data, "Uninitialized array pointer!");
 			const ptrdiff_t										ptrDiff										= ptrdiff_t(address) - (ptrdiff_t)Data;
 			const uint32_t										index										= (uint32_t)(ptrDiff / (ptrdiff_t)sizeof(_tObj));
@@ -270,7 +269,7 @@ namespace llc
 		}
 
 		// returns the new array size or -1 if failed.
-							int32_t						remove										(uint32_t index)																		{ 
+							::llc::error_t				remove										(uint32_t index)																		{ 
 			ree_if(0 == Data, "Uninitialized array pointer!");
 			ree_if(index >= Count, "Invalid index: %u.", index);
 			--Count;
@@ -282,7 +281,7 @@ namespace llc
 		}
 
 		// Returns the index of the argument if found or -1 if not.
-		inline				int32_t						find										(const _tPOD& valueToLookFor)										const				{
+		inline				::llc::error_t				find										(const _tPOD& valueToLookFor)										const				{
 			for(uint32_t i = 0; i < Count; ++i) 
 				if(0 == ::llc::podcmp(&Data[i], &valueToLookFor))
 					return i;
