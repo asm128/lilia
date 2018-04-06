@@ -65,6 +65,16 @@ namespace llc
 							int32_t													IndexGeometry;
 	};
 
+	struct SSceneTransforms {
+							::llc::SMatrix4<float>									Viewport									= {};
+							::llc::SMatrix4<float>									ViewportInverse								= {};
+							::llc::SMatrix4<float>									ViewportInverseCentered						= {};
+							::llc::SMatrix4<float>									FieldOfView									= {};
+							::llc::SMatrix4<float>									FinalProjection								= {};
+							::llc::SMatrix4<float>									FinalProjectionInverse						= {};
+							::llc::SMatrix4<float>									View										= {};
+	};
+
 	struct SScene {
 							::llc::array_pod<::llc::SSceneObject>					Objects										= {};
 							::llc::SSceneGeometries									Geometries									= {};
