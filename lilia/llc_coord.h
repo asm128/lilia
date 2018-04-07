@@ -307,6 +307,8 @@ namespace llc
 	template<typename _tElement>	struct SSphere3D		{ double Radius; ::llc::SCoord3<_tElement>	Center			; LLC_DEFAULT_OPERATOR_NE(SSphere3D		<_tElement>, Center	== other.Center	&& Radius	== other.Radius					); };
 	template<typename _tElement>	struct STriangle3D		{ ::llc::SCoord3<_tElement>					A, B, C			; LLC_DEFAULT_OPERATOR_NE(STriangle3D	<_tElement>, A		== other.A		&& B		== other.B		&& C == other.C	); };
 
+	template<typename _tElement>	struct STriangleWeights	{ _tElement									A, B, C			; LLC_DEFAULT_OPERATOR_NE(STriangle3D	<_tElement>, A		== other.A		&& B		== other.B		&& C == other.C	); };
+
 	template<typename _tElement>
 							STriangle2D<_tElement>&						translate								(::llc::STriangle2D<_tElement>& triangle, const ::llc::SCoord2<_tElement>& translation)									{
 		triangle.A															+= translation;
@@ -337,6 +339,7 @@ namespace llc
 	template<typename _tElement>	static inline constexpr	_tElement				run						(const SLine2D<_tElement>& line)											noexcept	{ return line.B.x - line.A.x;		}
 	template<typename _tElement>	static inline constexpr	_tElement				slope					(const SLine2D<_tElement>& line)											noexcept	{ return rise(line) / run(line);	}
 	template<typename _tElement>	static		  constexpr	_tElement				orient2d				(const ::llc::SLine2D<_tElement>& segment, const ::llc::SCoord2<_tElement>& point)		{ return (segment.B.x - segment.A.x) * (point.y - segment.A.y) - (segment.B.y - segment.A.y) * (point.x - segment.A.x); }
+	template<typename _tElement>	static		  constexpr	_tElement				orient2d3d				(const ::llc::SLine3D<_tElement>& segment, const ::llc::SCoord2<_tElement>& point)		{ return (segment.B.x - segment.A.x) * (point.y - segment.A.y) - (segment.B.y - segment.A.y) * (point.x - segment.A.x); }
 
 	// ---- Collision
 	template<typename _tElement>	static					bool					raySegmentIntersect		(SCoord2<_tElement> r_d, SCoord2<_tElement> r_p, SCoord2<_tElement> s_d, SCoord2<_tElement> s_p)								{

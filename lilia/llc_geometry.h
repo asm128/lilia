@@ -7,31 +7,23 @@
 
 namespace llc 
 {
-	//template <typename _tUnit>
-	//struct SGeometryGrid {
-	//				::llc::SCoord3<_tUnit>								Normal										;
-	//				::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
-	//				::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
-	//};
-
-	//template <typename _tUnit>
-	//struct SGeometryBox {
-	//				::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
-	//				::llc::array_pod<::llc::SCoord3		<_tUnit>>		Normals										;
-	//				::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
-	//};
-
-	//template <typename _tUnit>
-	//struct SGeometryPolyhedron {
-	//				::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
-	//				::llc::array_pod<::llc::SCoord3		<_tUnit>>		Normals										;
-	//				::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
-	//};
-
 	template <typename _tUnit>
 	struct SModelGeometry {
 					::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
-					::llc::array_pod<::llc::SCoord3		<_tUnit>>		Normals										;
+					::llc::array_pod<::llc::SCoord3		<_tUnit>>		NormalsTriangle								;
+					::llc::array_pod<::llc::STriangle3D	<_tUnit>>		NormalsVertex								;
+					::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
+	};
+
+	template <typename _tUnit>
+	struct SModelGeometryIndexed {
+					::llc::array_pod<int32_t>							IndicesPositions							;
+					::llc::array_pod<::llc::STriangle3D	<_tUnit>>		Positions									;
+					::llc::array_pod<int32_t>							IndicesNormalsTriangle						;
+					::llc::array_pod<::llc::SCoord3		<_tUnit>>		NormalsTriangle								;
+					::llc::array_pod<int32_t>							IndicesNormalsVertex						;
+					::llc::array_pod<::llc::STriangle3D	<_tUnit>>		NormalsVertex								;
+					::llc::array_pod<int32_t>							IndicesNormalsUVs							;
 					::llc::array_pod<::llc::STriangle2D	<_tUnit>>		UVs											;
 	};
 
@@ -56,9 +48,23 @@ namespace llc
 
 	// --- Geometry generation: Cube.
 				::llc::error_t										generateCubePositions					(::llc::array_pod<::llc::STriangle3D<float>>& out_Positions	);
-				::llc::error_t										generateCubeNormals						(::llc::array_pod<::llc::SCoord3	<float>>& out_Normals	);
+				::llc::error_t										generateCubeNormalsTriangle				(::llc::array_pod<::llc::SCoord3	<float>>& out_Normals	);
+				::llc::error_t										generateCubeNormalsVertex				(::llc::array_pod<::llc::STriangle3D<float>>& out_Normals	);
 				::llc::error_t										generateCubeUV							(::llc::array_pod<::llc::STriangle2D<float>>& out_UV		);
-				::llc::error_t										generateCubeGeometry					(::llc::array_pod<::llc::STriangle3D<float>>& out_Positions	, ::llc::array_pod<::llc::SCoord3<float>>& out_Normals, ::llc::array_pod<::llc::STriangle2D<float>>& out_UV);
-}
+				::llc::error_t										generateCubeGeometry					
+					( ::llc::array_pod<::llc::STriangle3D	<float>> & out_Positions	
+					, ::llc::array_pod<::llc::SCoord3		<float>> & out_Normals
+					, ::llc::array_pod<::llc::STriangle3D	<float>> & out_NormalsVertex
+					, ::llc::array_pod<::llc::STriangle2D	<float>> & out_UV
+					);
+				static inline ::llc::error_t						generateCubeGeometry					(::llc::SModelGeometry<float>& out_Geometry)	{
+					return generateCubeGeometry
+						( out_Geometry.Positions
+						, out_Geometry.NormalsTriangle
+						, out_Geometry.NormalsVertex
+						, out_Geometry.UVs
+						);
+				}
+} // namespace
 
 #endif // LLC_GEOMETRY_H

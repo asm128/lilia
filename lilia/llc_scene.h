@@ -79,6 +79,7 @@ namespace llc
 							::llc::array_pod<::llc::SSceneObject>					Objects										= {};
 							::llc::SSceneGeometries									Geometries									= {};
 							::llc::SSceneLights										Lights										= {};
+							::llc::SSceneTransforms									Transforms									= {};
 
 							::llc::array_pod<::llc::SModelPivot	<float>>			ObjectPivots								= {};
 							::llc::array_pod<::llc::SMatrix4	<float>>			ObjectTransform								= {};
@@ -88,8 +89,8 @@ namespace llc
 							::llc::SSceneCamera										Camera										= 
 								{ ::llc::SCameraPoints{{20, 2.5, 0}, {}}	
 								, ::llc::SCameraRange
-									{ 0.001
-									, 30.0
+									{ 0.01
+									, 4000.0
 									, .25
 									}
 								, ::llc::SCameraVectors	

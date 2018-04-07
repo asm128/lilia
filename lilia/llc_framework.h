@@ -19,6 +19,7 @@ namespace llc
 							::llc::STimer										Timer										= {};
 							::llc::SFrameInfo									FrameInfo									= {};
 							::llc::STexture<::llc::SColorBGRA>					Offscreen									= {};
+							::llc::STexture<uint32_t>							OffscreenDepthStencil						= {};
 
 																				SFramework									(::llc::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
 	}; // struct

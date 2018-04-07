@@ -26,7 +26,7 @@
 #	define LLC_PLATFORM_CRT_BREAKPOINT()		do {} while(0)
 #	define LLC_PLATFORM_CRT_CHECK_MEMORY()		do {} while(0)
 #	define LLC_ERROR_PRINTF_ENABLED	
-//#	define LLC_WARNING_PRINTF_ENABLED	// Uncomment as needed
+#	define LLC_WARNING_PRINTF_ENABLED	// Uncomment as needed
 //#	define LLC_INFO_PRINTF_ENABLED		// Uncomment as needed
 //#	define LLC_SUCCESS_PRINTF_ENABLED	// Uncomment as needed
 #endif

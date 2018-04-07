@@ -183,9 +183,9 @@ namespace llc
 		for(int32_t x = ::llc::max(areaMin.x, 0); x < xStop; ++x) {	
 			const ::llc::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
-			int																			w0											= ::llc::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
-			int																			w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
-			int																			w2											= ::llc::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
+			int32_t																		w0											= ::llc::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int32_t																		w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int32_t																		w2											= ::llc::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if(w0 < 0)
 				continue;
 			if(w1 < 0)
@@ -201,28 +201,60 @@ namespace llc
 	}
 
 	template<typename _tCoord>
-	static					::llc::error_t									drawTriangle								(const ::llc::SCoord2<uint32_t>& targetMetrics, const ::llc::STriangle3D<_tCoord>& triangle, ::llc::array_pod<::llc::SCoord2<int32_t>>& out_Points)		{
+	static					::llc::error_t									drawTriangle								(::llc::grid_view<uint32_t>& targetDepth, double fFar, double fNear, const ::llc::STriangle3D<_tCoord>& triangle, ::llc::array_pod<::llc::SCoord2<int32_t>>& out_Points)		{
+		const ::llc::SCoord2<uint32_t>												& _targetMetrics							= targetDepth.metrics();
 		::llc::SCoord2	<int32_t>													areaMin										= {(int32_t)::llc::min(::llc::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::llc::min(::llc::min(triangle.A.y, triangle.B.y), triangle.C.y)};
 		::llc::SCoord2	<int32_t>													areaMax										= {(int32_t)::llc::max(::llc::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::llc::max(::llc::max(triangle.A.y, triangle.B.y), triangle.C.y)};
-		const int32_t																xStop										= ::llc::min(areaMax.x, (int32_t)targetMetrics.x);
+		const int32_t																xStop										= ::llc::min(areaMax.x, (int32_t)_targetMetrics.x);
 		int32_t																		pixelsDrawn									= 0;
-		for(int32_t y = ::llc::max(areaMin.y, 0), yStop = ::llc::min(areaMax.y, (int32_t)targetMetrics.y); y < yStop; ++y)
+		for(int32_t y = ::llc::max(areaMin.y, 0), yStop = ::llc::min(areaMax.y, (int32_t)_targetMetrics.y); y < yStop; ++y)
 		for(int32_t x = ::llc::max(areaMin.x, 0); x < xStop; ++x) {	
 			const ::llc::SCoord2<int32_t>												cellCurrent									= {x, y};
+			//const ::llc::SCoord2<double>												cellCurrentF								= cellCurrent.Cast<double>();
+			const ::llc::STriangle2D<int32_t>											triangle2D									= 
+				{ {(int32_t)triangle.A.x, (int32_t)triangle.A.y}
+				, {(int32_t)triangle.B.x, (int32_t)triangle.B.y}
+				, {(int32_t)triangle.C.x, (int32_t)triangle.C.y}
+				};
 			// Determine barycentric coordinates
-			int																			w0											= ::llc::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
-			int																			w1											= ::llc::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
-			int																			w2											= ::llc::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
-			if(w0 < 0)
+			int32_t																		w0											= ::llc::orient2d3d({triangle.B.Cast<int32_t>(), triangle.A.Cast<int32_t>()}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int32_t																		w1											= ::llc::orient2d3d({triangle.C.Cast<int32_t>(), triangle.B.Cast<int32_t>()}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int32_t																		w2											= ::llc::orient2d3d({triangle.A.Cast<int32_t>(), triangle.C.Cast<int32_t>()}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
+			//double																	w0											= ::llc::orient2d({triangle2D.B, triangle2D.A}, cellCurrentF);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
+			//double																	w1											= ::llc::orient2d({triangle2D.C, triangle2D.B}, cellCurrentF);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
+			//double																	w2											= ::llc::orient2d({triangle2D.A, triangle2D.C}, cellCurrentF);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
+			if(w0 <= -1)
 				continue;
-			if(w1 < 0)
+			if(w1 <= -1)
 				continue;
-			if(w2 < 0)
+			if(w2 <= -1)
 				continue;
+			::llc::STriangleWeights<double>											weights										= 
+				{ (double)(cellCurrent - triangle2D.A).LengthSquared()
+				, (double)(cellCurrent - triangle2D.B).LengthSquared()
+				, (double)(cellCurrent - triangle2D.C).LengthSquared()
+				};
+			const double																weightUnit									= weights.A + weights.B + weights.C;
+			weights																	= 
+				{ weights.A / weightUnit
+				, weights.B / weightUnit
+				, weights.C / weightUnit
+				};
+			//double weightCheck = weights.A + weights.B + weights.C;
+			//error_if(weightCheck != 1.0f, "Precision issue?");
+			const double																finalZ 
+				= triangle.A.z * (weights.A)
+				+ triangle.B.z * (weights.B)
+				+ triangle.C.z * (weights.C)
+				;
 			//if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
-			out_Points.push_back({x, y});
-			++pixelsDrawn;
-			//}
+			double																		depth										= ((finalZ - fNear) / (fFar - fNear));
+			int32_t																		finalDepth									= (int32_t)(depth * 0x00FFFFFF);
+			if((finalZ) > fNear && finalZ < fFar && (int32_t)(targetDepth[y][x] & 0x00FFFFFFU) > finalDepth) {
+				targetDepth[y][x]														= finalDepth;
+				out_Points.push_back({x, y});
+				++pixelsDrawn;
+			}
 		}
 		return pixelsDrawn;
 	}

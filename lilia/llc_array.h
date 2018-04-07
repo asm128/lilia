@@ -7,10 +7,17 @@
 
 namespace llc 
 {
-	template <typename... _Args>	void			clear	(_Args&&... args)						{ const int32_t results[] = {args.clear		()			..., 0}; }
-	template <typename... _Args>	::llc::error_t	resize	(uint32_t newSize, _Args&&... args)		{ const int32_t results[] = {args.resize	(newSize)	..., 0}; 
+	template <typename... _Args>	void			clear					(_Args&&... args)						{ const int32_t results[] = {args.clear()..., 0}; }
+	template <typename... _Args>	::llc::error_t	resize					(uint32_t newSize, _Args&&... args)		{ 
+		const uint32_t										oldSizes	[]			= {args.size	()			..., 0}; 
+		const int32_t										results		[]			= {args.resize	(newSize)	..., 0}; 
 		for(uint32_t i=0; i < ::llc::size(results); ++i)
-			ree_if(errored(results[i]), "Failed to set size: %i. Out of memory?", (int32_t)newSize);
+			if(errored(results[i])) {
+				error_printf("Failed to set size: %i. Out of memory?", (int32_t)newSize);
+				const int32_t dummy	[] = {args.resize(oldSizes[0])..., 0}; 
+				dummy;
+				return -1;
+			}
 		return 0; 
 	}
 
