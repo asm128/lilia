@@ -201,58 +201,56 @@ namespace llc
 	}
 
 	template<typename _tCoord>
-	static					::llc::error_t									drawTriangle								(::llc::grid_view<uint32_t>& targetDepth, double fFar, double fNear, const ::llc::STriangle3D<_tCoord>& triangle, ::llc::array_pod<::llc::SCoord2<int32_t>>& out_Points)		{
-		const ::llc::SCoord2<uint32_t>												& _targetMetrics							= targetDepth.metrics();
-		::llc::SCoord2	<int32_t>													areaMin										= {(int32_t)::llc::min(::llc::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::llc::min(::llc::min(triangle.A.y, triangle.B.y), triangle.C.y)};
-		::llc::SCoord2	<int32_t>													areaMax										= {(int32_t)::llc::max(::llc::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::llc::max(::llc::max(triangle.A.y, triangle.B.y), triangle.C.y)};
-		const int32_t																xStop										= ::llc::min(areaMax.x, (int32_t)_targetMetrics.x);
+	static					::llc::error_t									drawTriangle								(::llc::grid_view<uint32_t>& targetDepth, double fFar, double fNear, const ::llc::STriangle3D<_tCoord>& triangle, ::llc::array_pod<::llc::SCoord2<int32_t>>& out_Points, ::llc::array_pod<::llc::STriangleWeights<double>>& triangleWeigths)		{
 		int32_t																		pixelsDrawn									= 0;
-		for(int32_t y = ::llc::max(areaMin.y, 0), yStop = ::llc::min(areaMax.y, (int32_t)_targetMetrics.y); y < yStop; ++y)
-		for(int32_t x = ::llc::max(areaMin.x, 0); x < xStop; ++x) {	
-			const ::llc::SCoord2<int32_t>												cellCurrent									= {x, y};
-			//const ::llc::SCoord2<double>												cellCurrentF								= cellCurrent.Cast<double>();
+		const ::llc::SCoord2<uint32_t>												& _targetMetrics							= targetDepth.metrics();
+		::llc::SCoord2	<float>														areaMin										= {(float)::llc::min(::llc::min(triangle.A.x, triangle.B.x), triangle.C.x), (float)::llc::min(::llc::min(triangle.A.y, triangle.B.y), triangle.C.y)};
+		::llc::SCoord2	<float>														areaMax										= {(float)::llc::max(::llc::max(triangle.A.x, triangle.B.x), triangle.C.x), (float)::llc::max(::llc::max(triangle.A.y, triangle.B.y), triangle.C.y)};
+		const float																	xStop										= ::llc::min(areaMax.x, (float)_targetMetrics.x);
+		for(float y = ::llc::max(areaMin.y, 0.f), yStop = ::llc::min(areaMax.y, (float)_targetMetrics.y); y < yStop; ++y)
+		for(float x = ::llc::max(areaMin.x, 0.f); x < xStop; ++x) {	
+			const ::llc::SCoord2<int32_t>												cellCurrent									= {(int32_t)x, (int32_t)y};
 			const ::llc::STriangle2D<int32_t>											triangle2D									= 
 				{ {(int32_t)triangle.A.x, (int32_t)triangle.A.y}
 				, {(int32_t)triangle.B.x, (int32_t)triangle.B.y}
 				, {(int32_t)triangle.C.x, (int32_t)triangle.C.y}
 				};
-			// Determine barycentric coordinates
-			int32_t																		w0											= ::llc::orient2d3d({triangle.B.Cast<int32_t>(), triangle.A.Cast<int32_t>()}, cellCurrent);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
-			int32_t																		w1											= ::llc::orient2d3d({triangle.C.Cast<int32_t>(), triangle.B.Cast<int32_t>()}, cellCurrent);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
-			int32_t																		w2											= ::llc::orient2d3d({triangle.A.Cast<int32_t>(), triangle.C.Cast<int32_t>()}, cellCurrent);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
-			//double																	w0											= ::llc::orient2d({triangle2D.B, triangle2D.A}, cellCurrentF);	// ::llc::orient2d({triangle.A, triangle.B}, cellCurrent);
-			//double																	w1											= ::llc::orient2d({triangle2D.C, triangle2D.B}, cellCurrentF);	// ::llc::orient2d({triangle.B, triangle.C}, cellCurrent);
-			//double																	w2											= ::llc::orient2d({triangle2D.A, triangle2D.C}, cellCurrentF);	// ::llc::orient2d({triangle.C, triangle.A}, cellCurrent);
-			if(w0 <= -1)
+			int32_t																		w0											= ::llc::orient2d({triangle2D.B, triangle2D.A}, cellCurrent);	// Determine barycentric coordinates
+			int32_t																		w1											= ::llc::orient2d({triangle2D.C, triangle2D.B}, cellCurrent);
+			int32_t																		w2											= ::llc::orient2d({triangle2D.A, triangle2D.C}, cellCurrent);
+			if(w0 <= -1 || w1 <= -1 || w2 <= -1) // ---- If p is on or inside all edges, render pixel.
 				continue;
-			if(w1 <= -1)
-				continue;
-			if(w2 <= -1)
-				continue;
-			::llc::STriangleWeights<double>											weights										= 
-				{ (double)(cellCurrent - triangle2D.A).LengthSquared()
-				, (double)(cellCurrent - triangle2D.B).LengthSquared()
-				, (double)(cellCurrent - triangle2D.C).LengthSquared()
+			const ::llc::SCoord2<double>												cellCurrentF								= {x, y};
+			const ::llc::STriangleWeights<double>										lengths										= 
+				{ (double)(cellCurrentF - ::llc::SCoord2<double>{triangle.A.x, triangle.A.y} ).LengthSquared()
+				, (double)(cellCurrentF - ::llc::SCoord2<double>{triangle.B.x, triangle.B.y} ).LengthSquared()
+				, (double)(cellCurrentF - ::llc::SCoord2<double>{triangle.C.x, triangle.C.y} ).LengthSquared()
 				};
-			const double																weightUnit									= weights.A + weights.B + weights.C;
-			weights																	= 
-				{ weights.A / weightUnit
-				, weights.B / weightUnit
-				, weights.C / weightUnit
+			const double																BC											= (lengths.B + lengths.C);
+			const double																ABC											= lengths.A + BC;
+			const ::llc::STriangleWeights<double>										lengthsScaled								= 
+				{ 1 - (lengths.A / ABC)
+				, 1 - (lengths.B / ABC)
+				, 1 - (lengths.C / ABC)
 				};
-			//double weightCheck = weights.A + weights.B + weights.C;
-			//error_if(weightCheck != 1.0f, "Precision issue?");
+			const ::llc::STriangleWeights<double>										proportions								= 
+				{ (lengthsScaled.A / (lengthsScaled.A + lengthsScaled.B + lengthsScaled.C))
+				, (lengthsScaled.B / (lengthsScaled.A + lengthsScaled.B + lengthsScaled.C))
+				, (lengthsScaled.C / (lengthsScaled.A + lengthsScaled.B + lengthsScaled.C))
+				};
 			const double																finalZ 
-				= triangle.A.z * (weights.A)
-				+ triangle.B.z * (weights.B)
-				+ triangle.C.z * (weights.C)
+				= triangle.A.z * proportions.A
+				+ triangle.B.z * proportions.B
+				+ triangle.C.z * proportions.C
 				;
-			//if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
 			double																		depth										= ((finalZ - fNear) / (fFar - fNear));
+			if(depth > 1 || depth < 0) // discard from depth planes
+				continue;
 			int32_t																		finalDepth									= (int32_t)(depth * 0x00FFFFFF);
-			if((finalZ) > fNear && finalZ < fFar && (int32_t)(targetDepth[y][x] & 0x00FFFFFFU) > finalDepth) {
-				targetDepth[y][x]														= finalDepth;
-				out_Points.push_back({x, y});
+			if (targetDepth[(uint32_t)y][(uint32_t)x] > (uint32_t)finalDepth) { // check against depth buffer
+				targetDepth[(uint32_t)y][(uint32_t)x]									= finalDepth;
+				triangleWeigths.push_back(proportions);
+				out_Points.push_back(cellCurrent);
 				++pixelsDrawn;
 			}
 		}

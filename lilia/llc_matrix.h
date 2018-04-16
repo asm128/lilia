@@ -88,6 +88,8 @@ namespace llc
 			_21 = (_tBase)0;							_22 = (_tBase)(2.0 / offscreenMetrics.y);	_23 =												_24 = 
 			_31 =										_32 = (_tBase)0;							_33 = (_tBase)(1.0f / (fFar - fNear));				_34 = 
 			_41 =										_42 = (_tBase)0;							_43 = (_tBase)(-fNear * (1.0f / (fFar - fNear)));	_44 = (_tBase)1;
+			_33 = 1;
+			_43 = 0;
 		}
 							void				Identity					()																						noexcept	{
 			*this									= 
@@ -144,11 +146,11 @@ namespace llc
 		}
 							void				FieldOfView					(double fAngle, double fAspect, double zn, double zf)												{
 			double										fTan						= tan( fAngle / 2.0 );
-			_11 = (_tBase)(1.0 / ( fAspect * fTan )		);
-			_22 = (_tBase)(1.0 / fTan					);
-			_33 = (_tBase)(zf / ( zf - zn )				);
-			_34 = (_tBase)(1							);
-			_43 = (_tBase)(( -( zf*zn ) ) / ( zf - zn )	);
+			_11 = (_tBase)(1.0 / ( fAspect * fTan )			);
+			_22 = (_tBase)(1.0 / fTan						);
+			_33 = (_tBase)(zf / ( zf - zn )					);
+			_34 = (_tBase)(1								);
+			_43 = (_tBase)(( -( zf * zn ) ) / ( zf - zn )	);
 
 			_12 = _13 = _14 = _21 = _23 = _24 = _31 = _32 = _41 = _42 = _44 = (_tBase)0;
 		//	return *this;

@@ -87,10 +87,10 @@ namespace llc
 							::llc::array_pod<::llc::SMatrix4	<float>>			ObjectOrientationsInverse					= {};
 
 							::llc::SSceneCamera										Camera										= 
-								{ ::llc::SCameraPoints{{20, 2.5, 0}, {}}	
+								{ ::llc::SCameraPoints{{20, 2, 0}, {}}	
 								, ::llc::SCameraRange
 									{ 0.01
-									, 4000.0
+									, 40.0
 									, .25
 									}
 								, ::llc::SCameraVectors	
