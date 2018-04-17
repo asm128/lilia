@@ -215,30 +215,24 @@ namespace llc
 				, {(int32_t)triangle.B.x, (int32_t)triangle.B.y}
 				, {(int32_t)triangle.C.x, (int32_t)triangle.C.y}
 				};
-			int32_t																		w0											= ::llc::orient2d({triangle2D.B, triangle2D.A}, cellCurrent);	// Determine barycentric coordinates
-			int32_t																		w1											= ::llc::orient2d({triangle2D.C, triangle2D.B}, cellCurrent);
-			int32_t																		w2											= ::llc::orient2d({triangle2D.A, triangle2D.C}, cellCurrent);
-			if(w0 <= -1 || w1 <= -1 || w2 <= -1) // ---- If p is on or inside all edges, render pixel.
-				continue;
+			{
+				int32_t																		w0											= ::llc::orient2d({triangle2D.B, triangle2D.A}, cellCurrent);	// Determine barycentric coordinates
+				int32_t																		w1											= ::llc::orient2d({triangle2D.C, triangle2D.B}, cellCurrent);
+				int32_t																		w2											= ::llc::orient2d({triangle2D.A, triangle2D.C}, cellCurrent);
+				if(w0 <= -1 || w1 <= -1 || w2 <= -1) // ---- If p is on or inside all edges, render pixel.
+					continue;
+			}
 			const ::llc::SCoord2<double>												cellCurrentF								= {x, y};
-			const ::llc::STriangleWeights<double>										lengths										= 
-				{ (double)(cellCurrentF - ::llc::SCoord2<double>{triangle.A.x, triangle.A.y} ).LengthSquared()
-				, (double)(cellCurrentF - ::llc::SCoord2<double>{triangle.B.x, triangle.B.y} ).LengthSquared()
-				, (double)(cellCurrentF - ::llc::SCoord2<double>{triangle.C.x, triangle.C.y} ).LengthSquared()
+			::llc::STriangleWeights<double>												proportions									= 
+				{ ::llc::orient2d3d({triangle.C.Cast<double>(), triangle.B.Cast<double>()}, cellCurrentF)
+				, ::llc::orient2d3d({triangle.A.Cast<double>(), triangle.C.Cast<double>()}, cellCurrentF)
+				, ::llc::orient2d3d({triangle.B.Cast<double>(), triangle.A.Cast<double>()}, cellCurrentF)	// Determine barycentric coordinates
 				};
-			const double																BC											= (lengths.B + lengths.C);
-			const double																ABC											= lengths.A + BC;
-			const ::llc::STriangleWeights<double>										lengthsScaled								= 
-				{ 1 - (lengths.A / ABC)
-				, 1 - (lengths.B / ABC)
-				, 1 - (lengths.C / ABC)
-				};
-			const ::llc::STriangleWeights<double>										proportions								= 
-				{ (lengthsScaled.A / (lengthsScaled.A + lengthsScaled.B + lengthsScaled.C))
-				, (lengthsScaled.B / (lengthsScaled.A + lengthsScaled.B + lengthsScaled.C))
-				, (lengthsScaled.C / (lengthsScaled.A + lengthsScaled.B + lengthsScaled.C))
-				};
-			const double																finalZ 
+			double																		proportABC									= proportions.A + proportions.B + proportions.C;
+			proportions.A															/= proportABC;
+			proportions.B															/= proportABC;
+			proportions.C															/= proportABC;
+			double																		finalZ
 				= triangle.A.z * proportions.A
 				+ triangle.B.z * proportions.B
 				+ triangle.C.z * proportions.C
@@ -246,7 +240,7 @@ namespace llc
 			double																		depth										= ((finalZ - fNear) / (fFar - fNear));
 			if(depth > 1 || depth < 0) // discard from depth planes
 				continue;
-			int32_t																		finalDepth									= (int32_t)(depth * 0x00FFFFFF);
+			int32_t																		finalDepth									= (int32_t)(depth * 0xFFFFFFFF);
 			if (targetDepth[(uint32_t)y][(uint32_t)x] > (uint32_t)finalDepth) { // check against depth buffer
 				targetDepth[(uint32_t)y][(uint32_t)x]									= finalDepth;
 				triangleWeigths.push_back(proportions);
