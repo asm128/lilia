@@ -240,7 +240,7 @@ namespace llc
 			double																		depth										= ((finalZ - fNear) / (fFar - fNear));
 			if(depth > 1 || depth < 0) // discard from depth planes
 				continue;
-			int32_t																		finalDepth									= (int32_t)(depth * 0xFFFFFFFF);
+			uint32_t																	finalDepth									= (uint32_t)(depth * 0x00FFFFFFU);
 			if (targetDepth[(uint32_t)y][(uint32_t)x] > (uint32_t)finalDepth) { // check against depth buffer
 				targetDepth[(uint32_t)y][(uint32_t)x]									= finalDepth;
 				triangleWeigths.push_back(proportions);
@@ -397,6 +397,12 @@ namespace llc
 		return pixelsDrawn;
 	}
 
+
+	// Bresenham's line algorithm
+	template<typename _tCoord>
+	static					::llc::error_t									drawLine									(const ::llc::SCoord2<uint32_t>& targetMetrics, const ::llc::SLine3D<_tCoord>& line, ::llc::array_pod<::llc::SCoord2<int32_t>>& out_Points)				{
+		return drawLine(targetMetrics, ::llc::SLine2D<_tCoord>{{line.A.x, line.A.y}, {line.B.x, line.B.y}}, out_Points);
+	}
 } // namespace
 
 #endif // BITMAP_TARGET_H_98237498023745654654
