@@ -44,7 +44,7 @@ namespace llc
 		inline	const		::llc::array_view<_tTexel>							operator[]									(uint32_t index)	const							{ return View[index]; }
 
 							::llc::error_t										resize										(uint32_t newSizeX, uint32_t newSizeY)				{ llc_necall(Texels.resize(newSizeX * newSizeY), "cannot resize?"); View = {Texels.begin(), newSizeX, newSizeY}; return 0; }
-		inline				::llc::error_t										resize										(::llc::SCoord2<uint32_t> newSize)					{ return resize(newSize.x, newSize.y); }
+		inline				::llc::error_t										resize										(const ::llc::SCoord2<uint32_t>& newSize)			{ return resize(newSize.x, newSize.y); }
 	}; // struct
 
 	template<typename _tTexel>

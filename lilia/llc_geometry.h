@@ -58,7 +58,7 @@ namespace llc
 					, ::llc::array_pod<::llc::STriangle2D	<float>> & out_UV
 					);
 				static inline ::llc::error_t						generateCubeGeometry					(::llc::SModelGeometry<float>& out_Geometry)	{
-					return generateCubeGeometry
+					return ::llc::generateCubeGeometry
 						( out_Geometry.Positions
 						, out_Geometry.NormalsTriangle
 						, out_Geometry.NormalsVertex
@@ -78,7 +78,7 @@ namespace llc
 					, ::llc::array_pod<::llc::STriangle2D	<float>>	& out_UV
 					);
 				static inline ::llc::error_t						generateGridGeometry					(const ::llc::SCoord2<uint32_t>	& gridMetrics, ::llc::SModelGeometry<float>& out_Geometry)	{
-					return generateGridGeometry
+					return ::llc::generateGridGeometry
 						( gridMetrics
 						, out_Geometry.Positions
 						, out_Geometry.NormalsTriangle
