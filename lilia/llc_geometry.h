@@ -65,6 +65,27 @@ namespace llc
 						, out_Geometry.UVs
 						);
 				}
+
+				::llc::error_t										generateGridPositions					(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::STriangle3D	<float>>& out_Positions	);
+				::llc::error_t										generateGridNormalsTriangle				(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::SCoord3		<float>>& out_Normals	);
+				::llc::error_t										generateGridNormalsVertex				(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::STriangle3D	<float>>& out_Normals	);
+				::llc::error_t										generateGridUV							(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::STriangle2D	<float>>& out_UV		);
+				::llc::error_t										generateGridGeometry					
+					( const ::llc::SCoord2<uint32_t>					& gridMetrics
+					, ::llc::array_pod<::llc::STriangle3D	<float>>	& out_Positions	
+					, ::llc::array_pod<::llc::SCoord3		<float>>	& out_Normals
+					, ::llc::array_pod<::llc::STriangle3D	<float>>	& out_NormalsVertex
+					, ::llc::array_pod<::llc::STriangle2D	<float>>	& out_UV
+					);
+				static inline ::llc::error_t						generateGridGeometry					(const ::llc::SCoord2<uint32_t>	& gridMetrics, ::llc::SModelGeometry<float>& out_Geometry)	{
+					return generateGridGeometry
+						( gridMetrics
+						, out_Geometry.Positions
+						, out_Geometry.NormalsTriangle
+						, out_Geometry.NormalsVertex
+						, out_Geometry.UVs
+						);
+				}
 } // namespace
 
 #endif // LLC_GEOMETRY_H

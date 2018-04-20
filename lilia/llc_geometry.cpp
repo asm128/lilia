@@ -95,3 +95,55 @@ static constexpr	const ::llc::STriangle2D<float>					geometryCubeUV					[12]				
 	llc_necall(::llc::generateCubeUV				(out_UV				), "Some nasty problem caused this to fail.");
 	return 0; 
 }
+
+					
+					::llc::error_t									llc::generateGridPositions						(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::STriangle3D	<float>>& out_Positions	) { 
+	for(uint32_t z = 0; z < gridMetrics.y; ++z) 
+		for(uint32_t x = 0; x < gridMetrics.x; ++x) { 
+			out_Positions.push_back({{(float)x, 0, (float)z}, {(float)x		, 0, (float)z + 1}, {(float)x + 1, 0, (float)z + 1}}); 
+			out_Positions.push_back({{(float)x, 0, (float)z}, {(float)x + 1	, 0, (float)z + 1}, {(float)x + 1, 0, (float)z}}); 
+		}
+	return 0; 
+}
+					::llc::error_t									llc::generateGridNormalsTriangle				(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::SCoord3		<float>>& out_Normals	) { 
+	for(uint32_t z = 0; z < gridMetrics.y; ++z) 
+		for(uint32_t x = 0; x < gridMetrics.x; ++x) { 
+			out_Normals.push_back({0, 1, 0}); 
+			out_Normals.push_back({0, 1, 0}); 
+		} 
+	return 0; 
+}
+					::llc::error_t									llc::generateGridNormalsVertex					(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::STriangle3D	<float>>& out_Normals	) { 
+	for(uint32_t z = 0; z < gridMetrics.y; ++z) 
+		for(uint32_t x = 0; x < gridMetrics.x; ++x) { 
+			out_Normals.push_back({{0, 1, 0}, {0, 1, 0}, {0, 1, 0}}); 
+			out_Normals.push_back({{0, 1, 0}, {0, 1, 0}, {0, 1, 0}}); 
+		} 
+	return 0; 
+}
+					::llc::error_t									llc::generateGridUV								(const ::llc::SCoord2<uint32_t> & gridMetrics, ::llc::array_pod<::llc::STriangle2D	<float>>& out_UV		) { 
+	const ::llc::SCoord2<double>											gridUnit										= {1.0 / gridMetrics.x, 1.0 / gridMetrics.y};
+	const ::llc::SCoord2<double>											gridMetricsF									= gridMetrics.Cast<double>();
+	for(uint32_t z = 0; z < gridMetrics.y; ++z) 
+		for(uint32_t x = 0; x < gridMetrics.x; ++x) { 
+			const ::llc::SCoord2<double>											gridCell										= {x / gridMetricsF.x, z / gridMetricsF.y};
+			const ::llc::SCoord2<double>											gridCellFar										= gridCell + gridUnit;
+			out_UV.push_back({{(float)gridCell.x, (float)gridCell.y}, {(float)gridCell.x		, (float)gridCellFar.y}	, gridCellFar.Cast<float>()					}); 
+			out_UV.push_back({{(float)gridCell.x, (float)gridCell.y}, gridCellFar.Cast<float>()							, {(float)gridCellFar.x, (float)gridCell.y}	}); 
+		}
+	return 0; 
+}
+					::llc::error_t									llc::generateGridGeometry					
+	( const ::llc::SCoord2<uint32_t>					& gridMetrics
+	, ::llc::array_pod<::llc::STriangle3D	<float>>	& out_Positions	
+	, ::llc::array_pod<::llc::SCoord3		<float>>	& out_Normals
+	, ::llc::array_pod<::llc::STriangle3D	<float>>	& out_NormalsVertex
+	, ::llc::array_pod<::llc::STriangle2D	<float>>	& out_UV
+	)
+{ 
+	llc_necall(::llc::generateGridPositions			(gridMetrics, out_Positions		), "Some nasty problem caused this to fail.");
+	llc_necall(::llc::generateGridNormalsTriangle	(gridMetrics, out_Normals		), "Some nasty problem caused this to fail.");
+	llc_necall(::llc::generateGridNormalsVertex		(gridMetrics, out_NormalsVertex	), "Some nasty problem caused this to fail.");
+	llc_necall(::llc::generateGridUV				(gridMetrics, out_UV			), "Some nasty problem caused this to fail.");
+	return 0; 
+}
