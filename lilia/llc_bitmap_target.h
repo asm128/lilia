@@ -251,6 +251,21 @@ namespace llc
 		return pixelsDrawn;
 	}
 
+	template<typename _tCoord>
+	static	inline			::llc::error_t									drawTriangleIndexed							
+		( ::llc::grid_view<uint32_t>						& targetDepth
+		, double											fFar
+		, double											fNear
+		, uint32_t											baseIndex
+		, uint32_t											baseVertexIndex
+		, const ::llc::array_view<::llc::SCoord3<_tCoord>>	& coordList
+		, const ::llc::array_view<uint32_t>					& indices
+		, ::llc::array_pod<::llc::SCoord2<int32_t>>			& out_Points
+		, ::llc::array_pod<::llc::STriangleWeights<double>>	& triangleWeigths
+		) {
+		return drawTriangle(targetDepth, fFar, fNear, {coordList[indices[baseIndex + 0]], coordList[indices[baseIndex + 1]], coordList[indices[baseIndex + 2]]}, out_Points, triangleWeigths);
+	}
+
 	typedef		::llc::error_t												(*llc_raster_callback)						(void* bitmapTarget, const ::llc::SCoord2<uint32_t>& bitmapMetrics, const ::llc::SCoord2<uint32_t>& cellPos, const void* value);
 
 	// Bresenham's line algorithm
