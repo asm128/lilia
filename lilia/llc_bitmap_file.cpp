@@ -31,8 +31,7 @@ struct SHeaderFileBMP {
 // BMP Information Header
 struct SHeaderInfoBMP {
 					uint32_t																		Size		;	// Number of bytes in structure
-					int32_t																			Width		;	// Width of Image
-					int32_t																			Height		;	// Height of Image
+					::llc::SCoord2<int32_t>															Metrics		;	// Width and Height of Image
 					uint16_t																		Planes		;	// Always 1
 					uint16_t																		Bpp			;	// Bits Per Pixel (must be 24 for now)
 					uint32_t																		Compression	;	// Must be 0 (uncompressed)
@@ -53,8 +52,8 @@ struct SHeaderInfoBMP {
 		&& infoHeader.Bpp != 32
 		&& infoHeader.Bpp != 8
 		, "Unsupported bitmap format! Only 8, 24 and 32-bit bitmaps are supported.");	
-	uint32_t																								nPixelCount									= infoHeader.Width * infoHeader.Height;
-	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.Width, infoHeader.Height );	// make sure it contains data 
+	uint32_t																								nPixelCount									= infoHeader.Metrics.x * infoHeader.Metrics.y;
+	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.Metrics.x, infoHeader.Metrics.y);	// make sure it contains data 
 	out_Colors.resize(nPixelCount);
 	ubyte_t																									* srcBytes									= (ubyte_t*)(source + sizeof(SHeaderFileBMP) + sizeof(SHeaderInfoBMP));
 	bool																									b32Bit										= false;
@@ -65,10 +64,10 @@ struct SHeaderInfoBMP {
 		b32Bit																								= true;
 	case 24:
 		colorSize																							= b32Bit ? 4 : 3;
-		for(int32_t y = 0; y < infoHeader.Height; ++y)
-			for(int32_t x = 0; x < infoHeader.Width; ++x) {
-				int32_t																									linearIndexSrc								= y * infoHeader.Width * colorSize + (x * colorSize);
-				out_Colors[y * infoHeader.Width + x]																= 
+		for(int32_t y = 0; y < infoHeader.Metrics.y; ++y)
+		for(int32_t x = 0; x < infoHeader.Metrics.x; ++x) {
+				int32_t																									linearIndexSrc								= y * infoHeader.Metrics.x * colorSize + (x * colorSize);
+				out_Colors[y * infoHeader.Metrics.x + x]																= 
 					{ srcBytes[linearIndexSrc + 0]
 					, srcBytes[linearIndexSrc + 1]
 					, srcBytes[linearIndexSrc + 2]
@@ -77,9 +76,9 @@ struct SHeaderInfoBMP {
 			}
 		break;
 	case 8 :
-		for( int32_t y = 0; y < infoHeader.Height; ++y )
-			for( int32_t x = 0; x < infoHeader.Width; ++x ) {
-				int32_t																									linearIndexSrc								= y * infoHeader.Width + x;
+		for( int32_t y = 0; y < infoHeader.Metrics.y; ++y )
+		for( int32_t x = 0; x < infoHeader.Metrics.x; ++x ) {
+				int32_t																									linearIndexSrc								= y * infoHeader.Metrics.x + x;
 				out_Colors[linearIndexSrc]																			= 
 					{ srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
@@ -89,23 +88,20 @@ struct SHeaderInfoBMP {
 			}
 		break;
 	}
-	out_ImageView																						= ::llc::grid_view<::llc::SColorBGRA>{out_Colors.begin(), (uint32_t)infoHeader.Width, (uint32_t)infoHeader.Height};
+	out_ImageView																						= ::llc::grid_view<::llc::SColorBGRA>{out_Colors.begin(), (uint32_t)infoHeader.Metrics.x, (uint32_t)infoHeader.Metrics.y};
 	return 0;
 }
 
-					BOOL																			LoadBitmapFromBMPFile						(LPCSTR szFileName, HBITMAP *phBitmap, HPALETTE *phPalette)		{
-	BITMAP																									bm;
+					::llc::error_t																	LoadBitmapFromBMPFile						(const char* szFileName, HBITMAP *phBitmap, HPALETTE *phPalette)		{
 	*phBitmap																							= NULL;
 	*phPalette																							= NULL;
 	// Use LoadImage() to get the image loaded into a DIBSection
-	*phBitmap																							= (HBITMAP)LoadImageA( NULL, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
-	if( *phBitmap == NULL )
-	  return FALSE;
+	*phBitmap																							= (HBITMAP)LoadImageA(NULL, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
+	ree_if(*phBitmap == NULL, "Failed to load bitmap file: %s.", szFileName);
 
-	// Get the color depth of the DIBSection
-	GetObject(*phBitmap, sizeof(BITMAP), &bm );
-	// If the DIBSection is 256 color or less, it has a color table
-	if((bm.bmBitsPixel * bm.bmPlanes) <= 8) {
+	BITMAP																									bm											= {};
+	GetObject(*phBitmap, sizeof(BITMAP), &bm);		// Get the color depth of the DIBSection
+	if((bm.bmBitsPixel * bm.bmPlanes) <= 8) { // If the DIBSection is 256 color or less, it has a color table
 		HDC																										hMemDC;
 		HBITMAP																									hOldBitmap;
 		RGBQUAD																									rgb[256];
@@ -116,7 +112,7 @@ struct SHeaderInfoBMP {
 		// Get the DIBSection's color table
 		GetDIBColorTable(hMemDC, 0, 256, rgb);
 		// Create a palette from the color tabl
-		pLogPal																								= (LOGPALETTE *)malloc(sizeof(LOGPALETTE) + (256*sizeof(PALETTEENTRY)));
+		pLogPal																								= (LOGPALETTE *)malloc(sizeof(LOGPALETTE) + (256 * sizeof(PALETTEENTRY)));
 		pLogPal->palVersion																					= 0x300;
 		pLogPal->palNumEntries																				= 256;
 		for(WORD i = 0; i < 256; ++i) {
@@ -137,7 +133,12 @@ struct SHeaderInfoBMP {
 		*phPalette																							= CreateHalftonePalette( hRefDC );
 		ReleaseDC(NULL, hRefDC);
 	}
-	return TRUE;
+	return 0;
+}
+
+					::llc::error_t																	bmpFileLoadPaletted							(FILE* source, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView)					{
+	source, out_Colors, out_ImageView;
+	return 0;
 }
 
 // Currently supporting only 24-bit bitmaps
@@ -146,8 +147,8 @@ struct SHeaderInfoBMP {
 	::SHeaderInfoBMP																						infoHeader									= {};
 	ree_if(fread(&fileHeader, 1, sizeof(::SHeaderFileBMP), source) != sizeof(::SHeaderFileBMP), "Failed to read file! File corrupt?");
 	ree_if(fread(&infoHeader, 1, sizeof(::SHeaderInfoBMP), source) != sizeof(::SHeaderInfoBMP), "Failed to read file! File corrupt?");
-	uint32_t																								nPixelCount									= infoHeader.Width * infoHeader.Height;
-	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.Width, infoHeader.Height);	// make sure it contains data 
+	uint32_t																								nPixelCount									= infoHeader.Metrics.x * infoHeader.Metrics.y;
+	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.Metrics.x, infoHeader.Metrics.y);	// make sure it contains data 
 	ree_if(infoHeader.Compression != BI_RGB, "Unsupported bmp compression!");
 	ree_if(infoHeader.Bpp != 24
 		&& infoHeader.Bpp != 32
@@ -168,10 +169,10 @@ struct SHeaderInfoBMP {
 		b32Bit																								= true;
 	case 24:
 		colorSize																							= b32Bit ? 4 : 3;
-		for(int32_t y = 0; y < infoHeader.Height; ++y)
-			for(int32_t x = 0; x < infoHeader.Width; ++x) {
-				int32_t																									linearIndexSrc								= y * infoHeader.Width * colorSize + (x * colorSize);
-				out_Colors[y * infoHeader.Width + x]																= 
+		for(int32_t y = 0; y < infoHeader.Metrics.y; ++y)
+		for(int32_t x = 0; x < infoHeader.Metrics.x; ++x) {
+				int32_t																									linearIndexSrc								= y * infoHeader.Metrics.x * colorSize + (x * colorSize);
+				out_Colors[y * infoHeader.Metrics.x + x]																= 
 					{ srcBytes[linearIndexSrc + 0]
 					, srcBytes[linearIndexSrc + 1]
 					, srcBytes[linearIndexSrc + 2]
@@ -180,9 +181,9 @@ struct SHeaderInfoBMP {
 			}
 		break;
 	case 8 :
-		for(int32_t y = 0; y < infoHeader.Height; ++y)
-			for(int32_t x = 0; x < infoHeader.Width; ++x) {
-				int32_t																									linearIndexSrc								= y * infoHeader.Width + x;
+		for(int32_t y = 0; y < infoHeader.Metrics.y; ++y)
+		for(int32_t x = 0; x < infoHeader.Metrics.x; ++x) {
+				int32_t																									linearIndexSrc								= y * infoHeader.Metrics.x + x;
 				out_Colors[linearIndexSrc]																			= 
 					{ srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
@@ -192,10 +193,10 @@ struct SHeaderInfoBMP {
 			}
 		break;
 	case 1 :
-		for(int32_t y = 0; y < infoHeader.Height; ++y)
-			for(int32_t x = 0; x < infoHeader.Width; ++x) {
-				int32_t																									linearIndexSrc								= y * (infoHeader.Width / 8) + x / 8;
-				int32_t																									linearIndexDst								= y * infoHeader.Width + x;
+		for(int32_t y = 0; y < infoHeader.Metrics.y; ++y)
+		for(int32_t x = 0; x < infoHeader.Metrics.x; ++x) {
+				int32_t																									linearIndexSrc								= y * (infoHeader.Metrics.x / 8) + x / 8;
+				int32_t																									linearIndexDst								= y *  infoHeader.Metrics.x + x;
 				out_Colors[linearIndexDst]																			= 
 					{ srcBytes[linearIndexSrc] & (1U << (x % 8))
 					, srcBytes[linearIndexSrc] & (1U << (x % 8))
@@ -205,11 +206,10 @@ struct SHeaderInfoBMP {
 			}
 		break;
 	}
-	out_ImageView																						= ::llc::grid_view<::llc::SColorBGRA>{out_Colors.begin(), (uint32_t)infoHeader.Width, (uint32_t)infoHeader.Height};
+	out_ImageView																						= ::llc::grid_view<::llc::SColorBGRA>{out_Colors.begin(), (uint32_t)infoHeader.Metrics.x, (uint32_t)infoHeader.Metrics.y};
 	return 0;
 }
 
-					
 // Currently supporting only 24-bit bitmaps
 					::llc::error_t																	llc::bmgFileLoad							(FILE							* source		, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView)	{ 
 	ree_if(0 == source, "Invalid function usage: destionation file cannot be NULL.");

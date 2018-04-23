@@ -91,6 +91,24 @@ namespace llc
 				safeguard.Handle								= 0;
 			}
 		}
+														array_pod									(const array_pod<_tPOD>& other)														{
+			if(other.Count) {
+				const uint32_t										newSize										= other.Count;
+				const uint32_t										reserveSize									= calc_reserve_size(newSize);
+				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
+				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
+				::llc::auto_llc_free								safeguard;
+				Data											= (_tPOD*)(safeguard.Handle = ::llc::llc_malloc(mallocSize));
+				throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize);
+				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
+				memcpy(Data, other.Data, newSize * sizeof(_tPOD));
+				//for(uint32_t i = 0, count = newSize; i<count; ++i)
+				//	Data[i]											= other[i];
+				Size											= (uint32_t)reserveSize;
+				Count											= other.Count;
+				safeguard.Handle								= 0;
+			}
+		}
 		template <size_t _otherCount>
 														array_pod									(const _tPOD (&other)[_otherCount])														{
 			if(other.Count) {
@@ -151,10 +169,11 @@ namespace llc
 			const uint32_t										requestedSize								= Count + chainLength; 
 			ree_if(requestedSize < Count, "Size overflow. Cannot append chain.");
 			const int32_t										newSize										= resize(requestedSize); 
-			ree_if(newSize != requestedSize, "Failed to resize array for appending.");
+			ree_if(newSize != (int32_t)requestedSize, "Failed to resize array for appending.");
 
-			for(uint32_t i = 0, maxCount = ::llc::min(chainLength, newSize - startIndex); i < maxCount; ++i)
-				Data[startIndex + i]							= chainToAppend[i];
+			//for(uint32_t i = 0, maxCount = ::llc::min(chainLength, newSize - startIndex); i < maxCount; ++i)
+				//Data[startIndex + i]							= chainToAppend[i];
+			memcpy(&Data[startIndex], chainToAppend, sizeof(_tPOD) * chainLength);
 			return startIndex;
 		}
 
