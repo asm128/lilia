@@ -64,25 +64,25 @@ namespace llc
 
 		constexpr					SColorBGR						()																noexcept	= default;
 		constexpr					SColorBGR						(const SColorBGR& otherColorInt)								noexcept	= default;
-		constexpr					SColorBGR						(uint8_t b_, uint8_t g_, uint8_t r_)							noexcept	: b(b_), g(g_), r(r_)																																													{}
-		constexpr					SColorBGR						(const SColorBGRA& other)										noexcept	: b(other.b), g(other.b), r(other.r)																																									{}
-		constexpr					SColorBGR						(const SColor16& other)											noexcept	: b((uint8_t)((other & 0x001F) / ((float)(0x1F))*255))	, g((uint8_t)(((other & 0x07E0) >>5) / ((float)(0x3F))*255)), r((uint8_t)(((other & 0xF800) >>11) / ((float)(0x1F))*255))						{}
-		constexpr					SColorBGR						(uint32_t other)												noexcept	: b((uint8_t)(((other & 0x000000FF) >> 0)))				, g((uint8_t)((other & 0x0000FF00) >> 8))					, r((uint8_t)(((other & 0x00FF0000) >> 16)))										{}
+		constexpr					SColorBGR						(uint8_t b_, uint8_t g_, uint8_t r_)							noexcept	: b(b_), g(g_), r(r_)																																														{}
+		constexpr					SColorBGR						(const SColorBGRA& other)										noexcept	: b(other.b), g(other.b), r(other.r)																																										{}
+		constexpr					SColorBGR						(const SColor16& other)											noexcept	: b((uint8_t)((other & 0x001F) / ((float)(0x1F))*255))	, g((uint8_t)(((other & 0x07E0) >>5) / ((float)(0x3F))*255)), r((uint8_t)(((other & 0xF800) >>11) / ((float)(0x1F))*255))							{}
+		constexpr					SColorBGR						(uint32_t other)												noexcept	: b((uint8_t)(((other & 0x000000FF) >> 0)))				, g((uint8_t)((other & 0x0000FF00) >> 8))					, r((uint8_t)(((other & 0x00FF0000) >> 16)))											{}
 
 		constexpr					operator		uint32_t		()														const	noexcept	{ return				0xFF000000 | (((uint32_t)r) << 16)	| (((uint32_t)g) << 8)							| (((uint32_t)b) << 0);																			}
-		constexpr					operator		SColorBGRA		()														const	noexcept	{ return SColorBGRA(	0xFF000000 | (((uint32_t)r) << 16)	| (((uint32_t)g) << 8)							| (((uint32_t)b) << 0));																	}
-		constexpr					operator		SColor16		()														const	noexcept	{ return (((uint16_t)(b * (1/255.0f) * 0x001F)) << 0)	| (((uint16_t)(g * (1/255.0f) * 0x003F)) << 5)	| (((uint16_t)(r * (1/255.0f) * 0x001F)) << 11 );												}
+		constexpr					operator		SColorBGRA		()														const	noexcept	{ return SColorBGRA(	0xFF000000 | (((uint32_t)r) << 16)	| (((uint32_t)g) << 8)							| (((uint32_t)b) << 0));																		}
+		constexpr					operator		SColor16		()														const	noexcept	{ return (((uint16_t)(b * (1/255.0f) * 0x001F)) << 0)	| (((uint16_t)(g * (1/255.0f) * 0x003F)) << 5)	| (((uint16_t)(r * (1/255.0f) * 0x001F)) << 11 );													}
 									SColorBGR&		operator=		(const SColorBGR& color)										noexcept	= default;
-		constexpr					bool			operator ==		(const SColorBGRA& other)								const	noexcept	{ return r == other.r && g == other.g && b == other.b;																																					}
-		constexpr					bool			operator ==		(const SColorBGR& other)								const	noexcept	{ return r == other.r && g == other.g && b == other.b;																																					}
-		constexpr					bool			operator ==		(const SColor16& other)									const	noexcept	{ return operator == (SColorBGR(other));																																								}
-		constexpr					bool			operator !=		(const SColorBGRA& other)								const	noexcept	{ return r != other.r || g != other.g || b != other.b;																																					}
-		constexpr					bool			operator !=		(const SColorBGR& other)								const	noexcept	{ return r != other.r || g != other.g || b != other.b;																																					}
-		constexpr					bool			operator !=		(const SColor16& other)									const	noexcept	{ return operator != (SColorBGR(other));																																								}
-		constexpr					SColorBGR		operator *		(float scalar)											const	noexcept	{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b * scalar, 0.0f, 255.0f)		, (uint8_t)::llc::clamp(g * scalar, 0.0f, 255.0f)		,	(uint8_t)::llc::clamp(r * scalar, 0.0f, 255.0f));						}
-		constexpr					SColorBGR		operator /		(float scalar)											const				{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b / scalar, 0.0f, 255.0f)		, (uint8_t)::llc::clamp(g / scalar, 0.0f, 255.0f)		,	(uint8_t)::llc::clamp(r / scalar, 0.0f, 255.0f));						}
-		constexpr					SColorBGR		operator *		(double scalar)											const	noexcept	{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b * scalar, 0.0,  255.0)		, (uint8_t)::llc::clamp(g * scalar, 0.0,  255.0)		,	(uint8_t)::llc::clamp(r * scalar, 0.0,  255.0));							}
-		constexpr					SColorBGR		operator /		(double scalar)											const				{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b / scalar, 0.0,  255.0)		, (uint8_t)::llc::clamp(g / scalar, 0.0,  255.0)		,	(uint8_t)::llc::clamp(r / scalar, 0.0,  255.0));							}
+		constexpr					bool			operator ==		(const SColorBGRA& other)								const	noexcept	{ return r == other.r && g == other.g && b == other.b;																																						}
+		constexpr					bool			operator ==		(const SColorBGR& other)								const	noexcept	{ return r == other.r && g == other.g && b == other.b;																																						}
+		constexpr					bool			operator ==		(const SColor16& other)									const	noexcept	{ return operator == (SColorBGR(other));																																									}
+		constexpr					bool			operator !=		(const SColorBGRA& other)								const	noexcept	{ return r != other.r || g != other.g || b != other.b;																																						}
+		constexpr					bool			operator !=		(const SColorBGR& other)								const	noexcept	{ return r != other.r || g != other.g || b != other.b;																																						}
+		constexpr					bool			operator !=		(const SColor16& other)									const	noexcept	{ return operator != (SColorBGR(other));																																									}
+		constexpr					SColorBGR		operator *		(float scalar)											const	noexcept	{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b * scalar, 0.0f, 255.0f)		, (uint8_t)::llc::clamp(g * scalar, 0.0f, 255.0f)		, (uint8_t)::llc::clamp(r * scalar, 0.0f, 255.0f));					}
+		constexpr					SColorBGR		operator /		(float scalar)											const				{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b / scalar, 0.0f, 255.0f)		, (uint8_t)::llc::clamp(g / scalar, 0.0f, 255.0f)		, (uint8_t)::llc::clamp(r / scalar, 0.0f, 255.0f));					}
+		constexpr					SColorBGR		operator *		(double scalar)											const	noexcept	{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b * scalar, 0.0,  255.0)		, (uint8_t)::llc::clamp(g * scalar, 0.0,  255.0)		, (uint8_t)::llc::clamp(r * scalar, 0.0,  255.0));					}
+		constexpr					SColorBGR		operator /		(double scalar)											const				{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b / scalar, 0.0,  255.0)		, (uint8_t)::llc::clamp(g / scalar, 0.0,  255.0)		, (uint8_t)::llc::clamp(r / scalar, 0.0,  255.0));					}
 		constexpr					SColorBGR		operator *		(const SColorBGR& color)								const	noexcept	{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b * (uint16_t)color.b, 0, 255) , (uint8_t)::llc::clamp(g * (uint16_t)color.g, 0, 255)	, (uint8_t)::llc::clamp(r * (uint16_t)color.r, 0, 255));			}
 		constexpr					SColorBGR		operator +		(const SColorBGR& color)								const	noexcept	{ return ::llc::SColorBGR ((uint8_t)::llc::clamp(b + (uint16_t)color.b, 0, 255) , (uint8_t)::llc::clamp(g + (uint16_t)color.g, 0, 255)	, (uint8_t)::llc::clamp(r + (uint16_t)color.r, 0, 255));			}
 		constexpr					SColorBGRA		operator *		(const SColorBGRA& color)								const	noexcept	{ return ::llc::SColorBGRA((uint8_t)::llc::clamp(b * (uint16_t)color.b, 0, 255) , (uint8_t)::llc::clamp(g * (uint16_t)color.g, 0, 255)	, (uint8_t)::llc::clamp(r * (uint16_t)color.r, 0, 255), color.a);	}
