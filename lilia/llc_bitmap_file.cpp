@@ -4,8 +4,68 @@
 
 #pragma pack(push, 1)
 
+					::llc::error_t																	LoadBitmapFromBMPFile						(const char* szFileName, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView)		{
+	// Use LoadImage() to get the image loaded into a DIBSection
+	HBITMAP																									phBitmap									= (HBITMAP)LoadImageA(NULL, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
+	ree_if(phBitmap == NULL, "Failed to load bitmap file: %s.", szFileName);
+
+	BITMAP																									bm											= {};
+	GetObject(phBitmap, sizeof(BITMAP), &bm);		// Get the color depth of the DIBSection
+	out_Colors.resize(bm.bmWidth * bm.bmHeight);
+	out_ImageView																						= {out_Colors.begin(), {(uint32_t)bm.bmWidth, (uint32_t)bm.bmHeight}};
+	HDC																										hMemDC										= CreateCompatibleDC(NULL);
+	HBITMAP																									hOldBitmap;
+	hOldBitmap																							= (HBITMAP)SelectObject(hMemDC, phBitmap);
+	for(uint32_t y = 0; y < out_ImageView.metrics().y; ++y)
+	for(uint32_t x = 0; x < out_ImageView.metrics().x; ++x) {
+		COLORREF																								colpix										= GetPixel(hMemDC, x, y); // GetPixel(hMemDC, x, out_ImageView.metrics().y - 1 - y);
+		out_ImageView[y][x]																					= {GetBValue(colpix), GetGValue(colpix), GetRValue(colpix), 0xFF};
+	}
+	SelectObject(hMemDC, hOldBitmap);
+	DeleteDC	(hMemDC);
+
+	//if((bm.bmBitsPixel * bm.bmPlanes) <= 8) { // If the DIBSection is 256 color or less, it has a color table
+	//	HDC																										hMemDC;
+	//	HBITMAP																									hOldBitmap;
+	//	RGBQUAD																									rgb[256];
+	//	LPLOGPALETTE																							pLogPal;
+	//	// Create a memory DC and select the DIBSection into it
+	//	hMemDC																								= CreateCompatibleDC(NULL);
+	//	hOldBitmap																							= (HBITMAP)SelectObject(hMemDC, *phBitmap);
+	//	// Get the DIBSection's color table
+	//	GetDIBColorTable(hMemDC, 0, 256, rgb);
+	//	// Create a palette from the color tabl
+	//	pLogPal																								= (LOGPALETTE *)malloc(sizeof(LOGPALETTE) + (256 * sizeof(PALETTEENTRY)));
+	//	pLogPal->palVersion																					= 0x300;
+	//	pLogPal->palNumEntries																				= 256;
+	//	for(WORD i = 0; i < 256; ++i) {
+	//	  pLogPal->palPalEntry[i].peRed																			= rgb[i].rgbRed;
+	//	  pLogPal->palPalEntry[i].peGreen																		= rgb[i].rgbGreen;
+	//	  pLogPal->palPalEntry[i].peBlue																		= rgb[i].rgbBlue;
+	//	  pLogPal->palPalEntry[i].peFlags																		= 0;
+	//	}
+	//	phPalette																							= CreatePalette( pLogPal );
+	//	// Clean up
+	//	free( pLogPal );
+	//	SelectObject(hMemDC, hOldBitmap);
+	//	DeleteDC	(hMemDC);
+	//	DeleteObject(phPalette);
+	//}
+	//else { // It has no color table, so use a halftone palette
+	//	HDC																										hRefDC;
+	//	hRefDC																								= GetDC( NULL );
+	//	phPalette																							= CreateHalftonePalette( hRefDC );
+	//	ReleaseDC(NULL, hRefDC);
+	//}
+	return 0;
+}
+
 					::llc::error_t																	llc::bmpFileLoad							(const ::llc::view_const_string	& filename	, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView)	{ // 
+#if defined(LLC_WINDOWS)
+	return ::LoadBitmapFromBMPFile(filename.begin(), out_Colors, out_ImageView);
+#else
 	FILE																									* source									= 0; 
+
 	fopen_s(&source, filename.begin(), "rb");
 	if(0 == source) {
 		error_printf("Failed to open file: %s. File not found?", filename.begin());
@@ -18,6 +78,7 @@
 	}
 	fclose(source);
 	return 0;
+#endif
 }
 
 // BMP File header 
@@ -89,50 +150,6 @@ struct SHeaderInfoBMP {
 		break;
 	}
 	out_ImageView																						= ::llc::grid_view<::llc::SColorBGRA>{out_Colors.begin(), (uint32_t)infoHeader.Metrics.x, (uint32_t)infoHeader.Metrics.y};
-	return 0;
-}
-
-					::llc::error_t																	LoadBitmapFromBMPFile						(const char* szFileName, HBITMAP *phBitmap, HPALETTE *phPalette)		{
-	*phBitmap																							= NULL;
-	*phPalette																							= NULL;
-	// Use LoadImage() to get the image loaded into a DIBSection
-	*phBitmap																							= (HBITMAP)LoadImageA(NULL, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	ree_if(*phBitmap == NULL, "Failed to load bitmap file: %s.", szFileName);
-
-	BITMAP																									bm											= {};
-	GetObject(*phBitmap, sizeof(BITMAP), &bm);		// Get the color depth of the DIBSection
-	if((bm.bmBitsPixel * bm.bmPlanes) <= 8) { // If the DIBSection is 256 color or less, it has a color table
-		HDC																										hMemDC;
-		HBITMAP																									hOldBitmap;
-		RGBQUAD																									rgb[256];
-		LPLOGPALETTE																							pLogPal;
-		// Create a memory DC and select the DIBSection into it
-		hMemDC																								= CreateCompatibleDC(NULL);
-		hOldBitmap																							= (HBITMAP)SelectObject(hMemDC, *phBitmap);
-		// Get the DIBSection's color table
-		GetDIBColorTable(hMemDC, 0, 256, rgb);
-		// Create a palette from the color tabl
-		pLogPal																								= (LOGPALETTE *)malloc(sizeof(LOGPALETTE) + (256 * sizeof(PALETTEENTRY)));
-		pLogPal->palVersion																					= 0x300;
-		pLogPal->palNumEntries																				= 256;
-		for(WORD i = 0; i < 256; ++i) {
-		  pLogPal->palPalEntry[i].peRed																			= rgb[i].rgbRed;
-		  pLogPal->palPalEntry[i].peGreen																		= rgb[i].rgbGreen;
-		  pLogPal->palPalEntry[i].peBlue																		= rgb[i].rgbBlue;
-		  pLogPal->palPalEntry[i].peFlags																		= 0;
-		}
-		*phPalette																							= CreatePalette( pLogPal );
-		// Clean up
-		free( pLogPal );
-		SelectObject(hMemDC, hOldBitmap);
-		DeleteDC	(hMemDC);
-	}
-	else { // It has no color table, so use a halftone palette
-		HDC																										hRefDC;
-		hRefDC																								= GetDC( NULL );
-		*phPalette																							= CreateHalftonePalette( hRefDC );
-		ReleaseDC(NULL, hRefDC);
-	}
 	return 0;
 }
 

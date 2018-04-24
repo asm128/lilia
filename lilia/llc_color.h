@@ -1,5 +1,6 @@
 /// Copyright 2009-2017 - asm128
 #include "llc_math.h"
+#include "llc_eval.h"
 
 #ifndef LLC_COLOR_H_29734982734
 #define LLC_COLOR_H_29734982734

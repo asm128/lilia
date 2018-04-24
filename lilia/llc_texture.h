@@ -15,17 +15,8 @@ namespace llc
 							::llc::grid_view<_tTexel>							View										;
 
 		constexpr																STexture									()													= default;
-																				STexture									(const ::llc::grid_view<_tTexel>& other)				{ 
-			Texels																	= other;
-			View																	= {Texels.begin(), other.metrics()};
-			return *this; 
-		}
-
-																				STexture									(const ::llc::STexture<_tTexel>& other)				{ 
-			Texels																	= other.Texels;
-			View																	= {Texels.begin(), other.View.metrics()};
-			return *this; 
-		}
+																				STexture									(const ::llc::grid_view<_tTexel>& other)			: Texels(other)			{ View = {Texels.begin(), other		.metrics()}; }
+																				STexture									(const ::llc::STexture<_tTexel>& other)				: Texels(other.Texels)	{ View = {Texels.begin(), other.View.metrics()}; }
 
 							::llc::STexture<_tTexel>&							operator=									(const ::llc::grid_view<_tTexel>& other)			{ 
 			Texels																	= {other.begin(), other.size()};
