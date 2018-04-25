@@ -92,80 +92,120 @@
 	return gndFileLoad(loaded, fileInMemory);
 }
 
+#pragma warning(disable : 4100)
+static		::llc::error_t									gndGenerateFaceGeometryFront							(uint32_t baseX, uint32_t baseY, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{ return 0; }
+static		::llc::error_t									gndGenerateFaceGeometryRight							(uint32_t baseX, uint32_t baseY, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{ return 0; }
+#pragma warning(default : 4100)
 
-			::llc::error_t								llc::gndGenerateFaceGeometry								(const ::llc::SGNDFileContents& loaded, TILE_FACE_FACING facing_direction, int32_t textureIndex, SModelNodeGND& generated, ::llc::grid_view<::llc::STileMapping> & out_mapping)	{
+static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX, uint32_t baseY, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{
+	const uint32_t													baseVertexIndex											= generated.Vertices.size();
+	const ::llc::SCoord3<float>										faceVerts	[4]											= 
+		{ {baseX + 0.0f, (geometryTile.fHeight[0] / tileScale), baseY + 0.0f}
+		, {baseX + 1.0f, (geometryTile.fHeight[1] / tileScale), baseY + 0.0f}
+		, {baseX + 0.0f, (geometryTile.fHeight[2] / tileScale), baseY + 1.0f}
+		, {baseX + 1.0f, (geometryTile.fHeight[3] / tileScale), baseY + 1.0f}
+		};
+	const ::llc::SCoord3<float>										faceNormals	[4]											=
+		{ (faceVerts[1] - faceVerts[0]).Cross(faceVerts[2] - faceVerts[0]).Normalize()
+		, (faceVerts[3] - faceVerts[1]).Cross(faceVerts[0] - faceVerts[1]).Normalize()
+		, (faceVerts[0] - faceVerts[2]).Cross(faceVerts[3] - faceVerts[2]).Normalize()
+		, (faceVerts[2] - faceVerts[3]).Cross(faceVerts[1] - faceVerts[3]).Normalize()
+		};
+	//::llc::SCoord3<float>											normal												
+	//	= faceNormals	[0]
+	//	+ faceNormals	[1]
+	//	+ faceNormals	[2]
+	//	+ faceNormals	[3]
+	//	;
+	//(normal /=4).Normalize();
+	//faceNormals	[0] = normal;
+	//faceNormals	[1] = normal;
+	//faceNormals	[2] = normal;
+	//faceNormals	[3] = normal;
+	generated.Vertices		.append(faceVerts	);
+	generated.Normals		.append(faceNormals	);
+	{
+		out_mapping.VerticesTop[0]									= baseVertexIndex + 0;
+		out_mapping.VerticesTop[1]									= baseVertexIndex + 1;
+		out_mapping.VerticesTop[2]									= baseVertexIndex + 2;
+		out_mapping.VerticesTop[3]									= baseVertexIndex + 3;
+	}
+	{
+		const int32_t													faceSkins	[4]										= 
+			{ geometryTile.SkinMapping.SkinIndexTop
+			, geometryTile.SkinMapping.SkinIndexTop
+			, geometryTile.SkinMapping.SkinIndexTop
+			, geometryTile.SkinMapping.SkinIndexTop
+			};
+		generated.SkinIndices.append(faceSkins);
+		const ::llc::STileSkinGND										& skinTile											= lstTileSkinData[faceSkins[0]];
+		const ::llc::SCoord2<float>										faceUVs	[4]											= 
+			{ {skinTile.u[0], skinTile.v[0]}
+			, {skinTile.u[1], skinTile.v[1]}
+			, {skinTile.u[2], skinTile.v[2]}
+			, {skinTile.u[3], skinTile.v[3]}
+			};
+		generated.UVs.append(faceUVs);
+	}
+	{
+		const ::llc::STriangleWeights<uint32_t>							faceIndices[6]										= 
+			{	{ baseVertexIndex + 0 // + 0//+ 0 // 0
+				, baseVertexIndex + 2 // + 1//+ 2 // 1
+				, baseVertexIndex + 1 // + 2//+ 1 // 2
+				} //			 //// 	+	 //// 
+			,	{ baseVertexIndex + 1 // + 1//+ 1 // 1
+				, baseVertexIndex + 2 // + 3//+ 2 // 3
+				, baseVertexIndex + 3 // + 2//+ 3 // 2
+			}
+			};
+		generated.VertexIndices	.append(faceIndices);
+	}
+	return 0;
+}
+			::llc::error_t										llc::gndGenerateFaceGeometry						(const ::llc::SGNDFileContents& loaded, TILE_FACE_FACING facing_direction, int32_t textureIndex, SModelNodeGND& generated, ::llc::grid_view<::llc::STileMapping> & out_mapping)	{
 	::llc::grid_view<const ::llc::STileGeometryGND>						geometryView										= {loaded.lstTileGeometryData.begin(), loaded.Metrics.Size};
 	for(uint32_t y = 0; y < geometryView.metrics().y; ++y)
 	for(uint32_t x = 0; x < geometryView.metrics().x; ++x) {
+		const ::llc::STileGeometryGND										& geometryTile										= geometryView[y][x];
+		const ::llc::STileGeometryGND										* geometryTileFront									= ((x + 1) < geometryView.metrics().x) ? &geometryView	[y][x + 1]	: 0;
+		const ::llc::STileGeometryGND										* geometryTileRight									= ((y + 1) < geometryView.metrics().y) ? &geometryView	[y + 1][x]	: 0;
+		//const ::llc::STileGeometryGND										* geometryTileFrontRight							
+		//	= ((x + 1) < geometryView.metrics().x 
+		//	&& (y + 1) < geometryView.metrics().y) 
+		//	? &geometryView	[y + 1][x + 1] : 0;
+
+		::llc::TILE_FACE_FACING												facingDirection										= facing_direction;
+		if(facingDirection == ::llc::TILE_FACE_FACING_FRONT && geometryTileFront && (geometryTileFront->fHeight[0] > geometryTile.fHeight[1] || geometryTileFront->fHeight[2] > geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_BACK;
+		if(facingDirection == ::llc::TILE_FACE_FACING_BACK	&& geometryTileFront && (geometryTileFront->fHeight[0] < geometryTile.fHeight[1] || geometryTileFront->fHeight[2] < geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_FRONT;
+		if(facingDirection == ::llc::TILE_FACE_FACING_RIGHT && geometryTileRight && (geometryTileRight->fHeight[0] > geometryTile.fHeight[2] || geometryTileRight->fHeight[1] > geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_LEFT;
+		if(facingDirection == ::llc::TILE_FACE_FACING_LEFT	&& geometryTileRight && (geometryTileRight->fHeight[0] < geometryTile.fHeight[2] || geometryTileRight->fHeight[1] < geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_RIGHT;
+		if(facingDirection != facing_direction)
+			continue;
 		switch(facing_direction) {
-		case TILE_FACE_FACING_TOP: {
-			const ::llc::STileGeometryGND									& geometryTile										= geometryView[y][x];
-			const uint32_t													baseVertexIndex										= generated.Vertices.size();
+		case TILE_FACE_FACING_BOTTOM: 
+		case TILE_FACE_FACING_TOP	: 
 			if(-1 == geometryTile.SkinMapping.SkinIndexTop)
 				continue;
 			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexTop].TextureIndex)
 				continue;
-			const ::llc::SCoord3<float>										faceVerts	[4]										= 
-				{ {x + 0.0f, (geometryTile.fHeight[0] / loaded.Metrics.TileScale), y + 0.0f}
-				, {x + 1.0f, (geometryTile.fHeight[1] / loaded.Metrics.TileScale), y + 0.0f}
-				, {x + 0.0f, (geometryTile.fHeight[2] / loaded.Metrics.TileScale), y + 1.0f}
-				, {x + 1.0f, (geometryTile.fHeight[3] / loaded.Metrics.TileScale), y + 1.0f}
-				};
-			const ::llc::SCoord3<float>										faceNormals	[4]										= 
-				{ (faceVerts[1] - faceVerts[0]).Cross(faceVerts[2] - faceVerts[0]).Normalize()
-				, (faceVerts[3] - faceVerts[1]).Cross(faceVerts[0] - faceVerts[1]).Normalize()
-				, (faceVerts[0] - faceVerts[2]).Cross(faceVerts[3] - faceVerts[2]).Normalize()
-				, (faceVerts[2] - faceVerts[3]).Cross(faceVerts[1] - faceVerts[3]).Normalize()
-				};
-			//::llc::SCoord3<float>											normal												
-			//	= faceNormals	[0]
-			//	+ faceNormals	[1]
-			//	+ faceNormals	[2]
-			//	+ faceNormals	[3]
-			//	;
-			//(normal /=4).Normalize();
-			//faceNormals	[0] = normal;
-			//faceNormals	[1] = normal;
-			//faceNormals	[2] = normal;
-			//faceNormals	[3] = normal;
-			generated.Vertices		.append(faceVerts	);
-			generated.Normals		.append(faceNormals	);
-
-			::llc::STileMapping												& vertexMap											= out_mapping[y][x];
-			vertexMap.VerticesTop[0]									= baseVertexIndex + 0;
-			vertexMap.VerticesTop[1]									= baseVertexIndex + 1;
-			vertexMap.VerticesTop[2]									= baseVertexIndex + 2;
-			vertexMap.VerticesTop[3]									= baseVertexIndex + 3;
-
-			const int32_t													faceSkins	[4]										= 
-				{ geometryTile.SkinMapping.SkinIndexTop
-				, geometryTile.SkinMapping.SkinIndexTop
-				, geometryTile.SkinMapping.SkinIndexTop
-				, geometryTile.SkinMapping.SkinIndexTop
-				};
-			generated.SkinIndices.append(faceSkins);
-			const ::llc::STileSkinGND										& skinTile											= loaded.lstTileTextureData[faceSkins[0]];
-			const ::llc::SCoord2<float>										faceUVs	[4]											= 
-				{ {skinTile.u[0], skinTile.v[0]}
-				, {skinTile.u[1], skinTile.v[1]}
-				, {skinTile.u[2], skinTile.v[2]}
-				, {skinTile.u[3], skinTile.v[3]}
-				};
-			generated.UVs.append(faceUVs);
-
-			const ::llc::STriangleWeights<uint32_t>							faceIndices[6]										= 
-				{	{ baseVertexIndex + 0 // + 0//+ 0 // 0
-					, baseVertexIndex + 2 // + 1//+ 2 // 1
-					, baseVertexIndex + 1 // + 2//+ 1 // 2
-					} //			 //// 	+	 //// 
-				,	{ baseVertexIndex + 1 // + 1//+ 1 // 1
-					, baseVertexIndex + 2 // + 3//+ 2 // 3
-					, baseVertexIndex + 3 // + 2//+ 3 // 2
-				}
-				};
-			generated.VertexIndices	.append(faceIndices);
+			::gndGenerateFaceGeometryTop(x, y, loaded.Metrics.TileScale, geometryTile, loaded.lstTileTextureData, generated, out_mapping[y][x]);
 			break;
-		}
+		case TILE_FACE_FACING_BACK	: 
+		case TILE_FACE_FACING_FRONT	: 
+			if(-1 == geometryTile.SkinMapping.SkinIndexFront)
+				continue;
+			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexFront].TextureIndex)
+				continue;
+			::gndGenerateFaceGeometryFront(x, y, loaded.Metrics.TileScale, geometryTile, loaded.lstTileTextureData, generated, out_mapping[y][x]);
+			break;
+		case TILE_FACE_FACING_LEFT	: 
+		case TILE_FACE_FACING_RIGHT	: 
+			if(-1 == geometryTile.SkinMapping.SkinIndexRight)
+				continue;
+			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexRight].TextureIndex)
+				continue;
+			::gndGenerateFaceGeometryRight(x, y, loaded.Metrics.TileScale, geometryTile, loaded.lstTileTextureData, generated, out_mapping[y][x]);
+			break;
 		}
 	}
 	return 0;
