@@ -147,7 +147,13 @@
     <ClInclude Include="llc_scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="llc_gnd.h">
+    <ClInclude Include="llc_ro_rsm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_ro_gnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="llc_ro_rsw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -179,7 +185,13 @@
     <ClCompile Include="llc_gui_text.cpp">
       <Filter>gui</Filter>
     </ClCompile>
-    <ClCompile Include="llc_gnd.cpp">
+    <ClCompile Include="llc_ro_rsw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_ro_gnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="llc_ro_rsm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

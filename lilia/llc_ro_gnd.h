@@ -83,7 +83,7 @@ namespace llc
 				::llc::array_pod<::llc::SCoord3<float>>				Vertices		;
 				::llc::array_pod<::llc::SCoord2<float>>				UVs				;
 				::llc::array_pod<::llc::STriangleWeights<uint32_t>>	VertexIndices	; 
-				::llc::array_pod<int32_t>							SkinIndices		; // one per triangle (VertexIndices.size() / 3)
+				//::llc::array_pod<int32_t>							SkinIndices		; // one per triangle (VertexIndices.size() / 3)
 	};
 
 	struct STileMapping {

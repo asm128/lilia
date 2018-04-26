@@ -4,9 +4,8 @@
 
 #pragma pack(push, 1)
 
-					::llc::error_t																	LoadBitmapFromBMPFile						(const char* szFileName, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView)		{
-	// Use LoadImage() to get the image loaded into a DIBSection
-	HBITMAP																									phBitmap									= (HBITMAP)LoadImageA(NULL, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
+					::llc::error_t																	LoadBitmapFromBMPFile						(const char* szFileName, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView, const ::llc::SColorBGRA& alphaKey, bool* out_alphaFound)		{
+	HBITMAP																									phBitmap									= (HBITMAP)LoadImageA(NULL, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);		// Use LoadImage() to get the image loaded into a DIBSection
 	ree_if(phBitmap == NULL, "Failed to load bitmap file: %s.", szFileName);
 
 	BITMAP																									bm											= {};
@@ -18,12 +17,14 @@
 	hOldBitmap																							= (HBITMAP)SelectObject(hMemDC, phBitmap);
 	for(uint32_t y = 0; y < out_ImageView.metrics().y; ++y)
 	for(uint32_t x = 0; x < out_ImageView.metrics().x; ++x) {
-		COLORREF																								colpix										= GetPixel(hMemDC, x, y); // GetPixel(hMemDC, x, out_ImageView.metrics().y - 1 - y);
-		out_ImageView[y][x]																					= {GetBValue(colpix), GetGValue(colpix), GetRValue(colpix), 0xFF};
+		const COLORREF																							colpix										= GetPixel(hMemDC, x, y); // GetPixel(hMemDC, x, out_ImageView.metrics().y - 1 - y);
+		const ::llc::SColorBGRA																					toWrite										= {GetBValue(colpix), GetGValue(colpix), GetRValue(colpix), 0xFF};
+		out_ImageView[y][x]																					= toWrite;
+		if(toWrite == alphaKey && out_alphaFound)
+			*out_alphaFound																						= true;
 	}
 	SelectObject(hMemDC, hOldBitmap);
 	DeleteDC	(hMemDC);
-
 	//if((bm.bmBitsPixel * bm.bmPlanes) <= 8) { // If the DIBSection is 256 color or less, it has a color table
 	//	HDC																										hMemDC;
 	//	HBITMAP																									hOldBitmap;
@@ -62,7 +63,8 @@
 
 					::llc::error_t																	llc::bmpFileLoad							(const ::llc::view_const_string	& filename	, ::llc::array_pod<::llc::SColorBGRA>& out_Colors, ::llc::grid_view<::llc::SColorBGRA>& out_ImageView)	{ // 
 #if defined(LLC_WINDOWS)
-	return ::LoadBitmapFromBMPFile(filename.begin(), out_Colors, out_ImageView);
+	bool																									isAlpha										= false;
+	return ::LoadBitmapFromBMPFile(filename.begin(), out_Colors, out_ImageView, {0xFF, 0x00, 0xFF, 0xFF}, &isAlpha);
 #else
 	FILE																									* source									= 0; 
 
@@ -96,8 +98,7 @@ struct SHeaderInfoBMP {
 					uint16_t																		Planes		;	// Always 1
 					uint16_t																		Bpp			;	// Bits Per Pixel (must be 24 for now)
 					uint32_t																		Compression	;	// Must be 0 (uncompressed)
-					int32_t																			XPPM		;	// X Pels Per Meter
-					int32_t																			YPPM		;	// Y Pels Per Meter
+					::llc::SCoord2<int32_t>															PPM			;	// Pixels Per Meter
 					uint32_t																		ClrUsed		;	// 0 for 24 bpp bmps
 					uint32_t																		ClrImp		;	// 0
 					uint32_t																		Dunno		;	// 0

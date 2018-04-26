@@ -1,4 +1,4 @@
-#include "llc_gnd.h"
+#include "llc_ro_gnd.h"
 #include "llc_grid_view.h"
 
 				::llc::error_t								llc::gndFileLoad										(::llc::SGNDFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
@@ -37,7 +37,7 @@
 	uint32_t														tileCountSkin									= *(uint32_t*)&input[byteOffset]; byteOffset += sizeof(uint32_t); 
 	loaded.lstTileTextureData	.resize(tileCountSkin);			byteCount = (int32_t)(sizeof(STileSkinGND) * tileCountSkin);				memcpy(loaded.lstTileTextureData	.begin(), &input[byteOffset], byteCount);	byteOffset += byteCount; 
 
-	uint32_t														tileCountGeometry								= loaded.Metrics.Size.x * loaded.Metrics.Size.x;//*(uint32_t*)&input[byteOffset]; byteOffset													+= sizeof(uint32_t); 
+	uint32_t														tileCountGeometry								= loaded.Metrics.Size.x * loaded.Metrics.Size.y;//*(uint32_t*)&input[byteOffset]; byteOffset													+= sizeof(uint32_t); 
 	loaded.lstTileGeometryData.resize(tileCountGeometry); 
 	if( nVersionMajor > 1 || ( nVersionMajor == 1 && nVersionMinor >= 7 ) ) {
 		byteCount													= (int32_t)((sizeof(STileGeometryGND)) * tileCountGeometry);		
@@ -93,17 +93,110 @@
 }
 
 #pragma warning(disable : 4100)
-static		::llc::error_t									gndGenerateFaceGeometryFront							(uint32_t baseX, uint32_t baseY, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{ return 0; }
-static		::llc::error_t									gndGenerateFaceGeometryRight							(uint32_t baseX, uint32_t baseY, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{ return 0; }
-#pragma warning(default : 4100)
-
-static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX, uint32_t baseY, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{
+static		::llc::error_t									gndGenerateFaceGeometryRight							(uint32_t baseX, uint32_t baseZ, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::STileGeometryGND * geometryTileRight, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{ 
 	const uint32_t													baseVertexIndex											= generated.Vertices.size();
 	const ::llc::SCoord3<float>										faceVerts	[4]											= 
-		{ {baseX + 0.0f, (geometryTile.fHeight[0] / tileScale), baseY + 0.0f}
-		, {baseX + 1.0f, (geometryTile.fHeight[1] / tileScale), baseY + 0.0f}
-		, {baseX + 0.0f, (geometryTile.fHeight[2] / tileScale), baseY + 1.0f}
-		, {baseX + 1.0f, (geometryTile.fHeight[3] / tileScale), baseY + 1.0f}
+		{ {baseX + 0.0f, (geometryTile.fHeight[2] / tileScale), baseZ + 1.0f}
+		, {baseX + 1.0f, (geometryTile.fHeight[3] / tileScale), baseZ + 1.0f}
+		, {baseX + 0.0f, geometryTileRight ? (geometryTileRight->fHeight[0] / tileScale) : 0.0f, baseZ + 1.0f}
+		, {baseX + 1.0f, geometryTileRight ? (geometryTileRight->fHeight[1] / tileScale) : 0.0f, baseZ + 1.0f}
+		};
+	const ::llc::SCoord3<float>										faceNormals	[4]											=
+		{ (faceVerts[1] - faceVerts[0]).Cross(faceVerts[2] - faceVerts[0]).Normalize()
+		, (faceVerts[3] - faceVerts[1]).Cross(faceVerts[0] - faceVerts[1]).Normalize()
+		, (faceVerts[0] - faceVerts[2]).Cross(faceVerts[3] - faceVerts[2]).Normalize()
+		, (faceVerts[2] - faceVerts[3]).Cross(faceVerts[1] - faceVerts[3]).Normalize()
+		};
+
+	generated.Vertices		.append(faceVerts	);
+	generated.Normals		.append(faceNormals	);
+	for(uint32_t i = 0; i < 4; ++i)
+		out_mapping.VerticesRight[i]								= baseVertexIndex + i;
+
+	{
+		const int32_t													faceSkins	[4]										= 
+			{ geometryTile.SkinMapping.SkinIndexRight
+			, geometryTile.SkinMapping.SkinIndexRight
+			, geometryTile.SkinMapping.SkinIndexRight
+			, geometryTile.SkinMapping.SkinIndexRight
+			};
+		//generated.SkinIndices.append(faceSkins);
+		const ::llc::STileSkinGND										& skinTile											= lstTileSkinData[faceSkins[0]];
+		::llc::SCoord2<float>											faceUVs	[4]											;
+		for(uint32_t i = 0; i < 4; ++i)
+			faceUVs[i]													= {skinTile.u[i], skinTile.v[i]};
+		generated.UVs.append(faceUVs);
+	}
+	{
+		const ::llc::STriangleWeights<uint32_t>							faceIndices[6]										= 
+			{	{ baseVertexIndex + 0 // + 0//+ 0 // 0
+				, baseVertexIndex + 1 // + 1//+ 2 // 1
+				, baseVertexIndex + 2 // + 2//+ 1 // 2
+				} //			 //// 	+	 //// 
+			,	{ baseVertexIndex + 1 // + 1//+ 1 // 1
+				, baseVertexIndex + 3 // + 3//+ 2 // 3
+				, baseVertexIndex + 2 // + 2//+ 3 // 2
+			}
+			};
+		generated.VertexIndices	.append(faceIndices);
+	}	
+	return 0; 
+}
+
+static		::llc::error_t									gndGenerateFaceGeometryFront							(uint32_t baseX, uint32_t baseZ, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::STileGeometryGND * geometryTileFront, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{ 
+	const uint32_t													baseVertexIndex											= generated.Vertices.size();
+	const ::llc::SCoord3<float>										faceVerts	[4]											= 
+		{ {baseX + 1.0f, (geometryTile.fHeight[3] / tileScale), baseZ + 1.0f}
+		, {baseX + 1.0f, (geometryTile.fHeight[1] / tileScale), baseZ + 0.0f}
+		, {baseX + 1.0f, geometryTileFront ? (geometryTileFront->fHeight[2] / tileScale) : 0.0f, baseZ + 1.0f}
+		, {baseX + 1.0f, geometryTileFront ? (geometryTileFront->fHeight[0] / tileScale) : 0.0f, baseZ + 0.0f}
+		};
+	const ::llc::SCoord3<float>										faceNormals	[4]											=
+		{ (faceVerts[1] - faceVerts[0]).Cross(faceVerts[2] - faceVerts[0]).Normalize()
+		, (faceVerts[3] - faceVerts[1]).Cross(faceVerts[0] - faceVerts[1]).Normalize()
+		, (faceVerts[0] - faceVerts[2]).Cross(faceVerts[3] - faceVerts[2]).Normalize()
+		, (faceVerts[2] - faceVerts[3]).Cross(faceVerts[1] - faceVerts[3]).Normalize()
+		};
+	generated.Vertices		.append(faceVerts	);
+	generated.Normals		.append(faceNormals	);
+	for(uint32_t i = 0; i < 4; ++i)
+		out_mapping.VerticesFront[i]								= baseVertexIndex + i;
+	{
+		const int32_t													faceSkins	[4]										= 
+			{ geometryTile.SkinMapping.SkinIndexFront
+			, geometryTile.SkinMapping.SkinIndexFront
+			, geometryTile.SkinMapping.SkinIndexFront
+			, geometryTile.SkinMapping.SkinIndexFront
+			};
+		//generated.SkinIndices.append(faceSkins);
+		const ::llc::STileSkinGND										& skinTile											= lstTileSkinData[faceSkins[0]];
+		::llc::SCoord2<float>											faceUVs	[4]											;
+		for(uint32_t i = 0; i < 4; ++i)
+			faceUVs[i]													= {skinTile.u[i], skinTile.v[i]};
+		generated.UVs.append(faceUVs);
+		const ::llc::STriangleWeights<uint32_t>							faceIndices[6]										= 
+			{	{ baseVertexIndex + 0 // + 0//+ 0 // 0
+				, baseVertexIndex + 1 // + 1//+ 2 // 1
+				, baseVertexIndex + 2 // + 2//+ 1 // 2
+				} //			 //// 	+	 //// 
+			,	{ baseVertexIndex + 1 // + 1//+ 1 // 1
+				, baseVertexIndex + 3 // + 3//+ 2 // 3
+				, baseVertexIndex + 2 // + 2//+ 3 // 2
+			}
+			};
+		generated.VertexIndices	.append(faceIndices);
+	}	
+	return 0; 
+}
+#pragma warning(default : 4100)
+
+static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX, uint32_t baseZ, float tileScale, const ::llc::STileGeometryGND & geometryTile, const ::llc::array_view<::llc::STileSkinGND>& lstTileSkinData, ::llc::SModelNodeGND& generated, ::llc::STileMapping & out_mapping)	{
+	const uint32_t													baseVertexIndex											= generated.Vertices.size();
+	const ::llc::SCoord3<float>										faceVerts	[4]											= 
+		{ {baseX + 0.0f, (geometryTile.fHeight[0] / tileScale), baseZ + 0.0f}
+		, {baseX + 1.0f, (geometryTile.fHeight[1] / tileScale), baseZ + 0.0f}
+		, {baseX + 0.0f, (geometryTile.fHeight[2] / tileScale), baseZ + 1.0f}
+		, {baseX + 1.0f, (geometryTile.fHeight[3] / tileScale), baseZ + 1.0f}
 		};
 	const ::llc::SCoord3<float>										faceNormals	[4]											=
 		{ (faceVerts[1] - faceVerts[0]).Cross(faceVerts[2] - faceVerts[0]).Normalize()
@@ -124,12 +217,9 @@ static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX
 	//faceNormals	[3] = normal;
 	generated.Vertices		.append(faceVerts	);
 	generated.Normals		.append(faceNormals	);
-	{
-		out_mapping.VerticesTop[0]									= baseVertexIndex + 0;
-		out_mapping.VerticesTop[1]									= baseVertexIndex + 1;
-		out_mapping.VerticesTop[2]									= baseVertexIndex + 2;
-		out_mapping.VerticesTop[3]									= baseVertexIndex + 3;
-	}
+	for(uint32_t i = 0; i < 4; ++i)
+		out_mapping.VerticesTop[i]								= baseVertexIndex + i;
+
 	{
 		const int32_t													faceSkins	[4]										= 
 			{ geometryTile.SkinMapping.SkinIndexTop
@@ -137,25 +227,22 @@ static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX
 			, geometryTile.SkinMapping.SkinIndexTop
 			, geometryTile.SkinMapping.SkinIndexTop
 			};
-		generated.SkinIndices.append(faceSkins);
+		//generated.SkinIndices.append(faceSkins);
 		const ::llc::STileSkinGND										& skinTile											= lstTileSkinData[faceSkins[0]];
-		const ::llc::SCoord2<float>										faceUVs	[4]											= 
-			{ {skinTile.u[0], skinTile.v[0]}
-			, {skinTile.u[1], skinTile.v[1]}
-			, {skinTile.u[2], skinTile.v[2]}
-			, {skinTile.u[3], skinTile.v[3]}
-			};
+		::llc::SCoord2<float>											faceUVs	[4]											;
+		for(uint32_t i = 0; i < 4; ++i)
+			faceUVs[i]													= {skinTile.u[i], skinTile.v[i]};
 		generated.UVs.append(faceUVs);
 	}
 	{
 		const ::llc::STriangleWeights<uint32_t>							faceIndices[6]										= 
 			{	{ baseVertexIndex + 0 // + 0//+ 0 // 0
-				, baseVertexIndex + 2 // + 1//+ 2 // 1
-				, baseVertexIndex + 1 // + 2//+ 1 // 2
+				, baseVertexIndex + 1 // + 1//+ 2 // 1
+				, baseVertexIndex + 2 // + 2//+ 1 // 2
 				} //			 //// 	+	 //// 
 			,	{ baseVertexIndex + 1 // + 1//+ 1 // 1
-				, baseVertexIndex + 2 // + 3//+ 2 // 3
-				, baseVertexIndex + 3 // + 2//+ 3 // 2
+				, baseVertexIndex + 3 // + 3//+ 2 // 3
+				, baseVertexIndex + 2 // + 2//+ 3 // 2
 			}
 			};
 		generated.VertexIndices	.append(faceIndices);
@@ -173,16 +260,21 @@ static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX
 		//	= ((x + 1) < geometryView.metrics().x 
 		//	&& (y + 1) < geometryView.metrics().y) 
 		//	? &geometryView	[y + 1][x + 1] : 0;
-
 		::llc::TILE_FACE_FACING												facingDirection										= facing_direction;
 		if(facingDirection == ::llc::TILE_FACE_FACING_FRONT && geometryTileFront && (geometryTileFront->fHeight[0] > geometryTile.fHeight[1] || geometryTileFront->fHeight[2] > geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_BACK;
 		if(facingDirection == ::llc::TILE_FACE_FACING_BACK	&& geometryTileFront && (geometryTileFront->fHeight[0] < geometryTile.fHeight[1] || geometryTileFront->fHeight[2] < geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_FRONT;
 		if(facingDirection == ::llc::TILE_FACE_FACING_RIGHT && geometryTileRight && (geometryTileRight->fHeight[0] > geometryTile.fHeight[2] || geometryTileRight->fHeight[1] > geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_LEFT;
 		if(facingDirection == ::llc::TILE_FACE_FACING_LEFT	&& geometryTileRight && (geometryTileRight->fHeight[0] < geometryTile.fHeight[2] || geometryTileRight->fHeight[1] < geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_RIGHT;
+		if(facingDirection == ::llc::TILE_FACE_FACING_FRONT && 0 == geometryTileFront && (0 > geometryTile.fHeight[1] || 0 > geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_BACK;
+		if(facingDirection == ::llc::TILE_FACE_FACING_BACK	&& 0 == geometryTileFront && (0 < geometryTile.fHeight[1] || 0 < geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_FRONT;
+		if(facingDirection == ::llc::TILE_FACE_FACING_RIGHT && 0 == geometryTileRight && (0 > geometryTile.fHeight[2] || 0 > geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_LEFT;
+		if(facingDirection == ::llc::TILE_FACE_FACING_LEFT	&& 0 == geometryTileRight && (0 < geometryTile.fHeight[2] || 0 < geometryTile.fHeight[3])) facingDirection = ::llc::TILE_FACE_FACING_RIGHT;
 		if(facingDirection != facing_direction)
 			continue;
 		switch(facing_direction) {
-		case TILE_FACE_FACING_BOTTOM: 
+		default:
+			break;
+		//case TILE_FACE_FACING_BOTTOM: 
 		case TILE_FACE_FACING_TOP	: 
 			if(-1 == geometryTile.SkinMapping.SkinIndexTop)
 				continue;
@@ -196,7 +288,7 @@ static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX
 				continue;
 			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexFront].TextureIndex)
 				continue;
-			::gndGenerateFaceGeometryFront(x, y, loaded.Metrics.TileScale, geometryTile, loaded.lstTileTextureData, generated, out_mapping[y][x]);
+			::gndGenerateFaceGeometryFront(x, y, loaded.Metrics.TileScale, geometryTile, geometryTileFront, loaded.lstTileTextureData, generated, out_mapping[y][x]);
 			break;
 		case TILE_FACE_FACING_LEFT	: 
 		case TILE_FACE_FACING_RIGHT	: 
@@ -204,7 +296,7 @@ static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX
 				continue;
 			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexRight].TextureIndex)
 				continue;
-			::gndGenerateFaceGeometryRight(x, y, loaded.Metrics.TileScale, geometryTile, loaded.lstTileTextureData, generated, out_mapping[y][x]);
+			::gndGenerateFaceGeometryRight(x, y, loaded.Metrics.TileScale, geometryTile, geometryTileRight, loaded.lstTileTextureData, generated, out_mapping[y][x]);
 			break;
 		}
 	}
