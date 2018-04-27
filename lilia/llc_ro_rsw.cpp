@@ -10,12 +10,26 @@
 
 
 	struct SRSWWorldInfo {
-					unsigned char											Unknown0	[12];
-					::llc::SCoord3<float>									UnknownV0	;
-					::llc::SCoord3<float>									UnknownV1	;
-					::llc::SCoord3<float>									UnknownV2	;
-					::llc::SCoord3<float>									UnknownV3	;
-					unsigned char											Unknown2	[176 - 60];
+					unsigned char											Unknown0	[40];
+					float													WaterHeight		;
+					uint32_t												WaterType		;
+					float													WaterAmplitude	;
+					float													WaterSpeed		;
+					float													WaterPitch		;
+					uint32_t												WaterTexCycling	;
+					int32_t													Longitude		;
+					int32_t													Latitude		;
+					float													Diffuse[3];
+					float													Ambient[3];
+					float													Intensity;
+					uint32_t												Top;
+					uint32_t												Bottom;
+					uint32_t												Left;
+					uint32_t												Right;
+					uint32_t												ObjectCount;
+					//unsigned char											Unknown2	[8];
+					//unsigned char											UnknownStr	[40];
+					//uint32_t												UnknownInts	[2];
 	};
 #pragma pack(pop)
 
@@ -43,11 +57,11 @@
 	::llc::array_view<int16_t>									i0216														= {(int16_t*)	worldInfo.Unknown0, 12 / 2};
 	::llc::array_view<float>									f02															= {(float*)		worldInfo.Unknown0, 12 / 4};
 																																										   
-	::llc::array_view<uint32_t>									u0432														= {(uint32_t*)	worldInfo.Unknown2, (176 - 60) / 4};
-	::llc::array_view<int32_t>									i0432														= {(int32_t*)	worldInfo.Unknown2, (176 - 60) / 4};
-	::llc::array_view<uint16_t>									u0416														= {(uint16_t*)	worldInfo.Unknown2, (176 - 60) / 2};
-	::llc::array_view<int16_t>									i0416														= {(int16_t*)	worldInfo.Unknown2, (176 - 60) / 2};
-	::llc::array_view<float>									f04															= {(float*)		worldInfo.Unknown2, (176 - 60) / 4};
+	//::llc::array_view<uint32_t>									u0432														= {(uint32_t*)	worldInfo.Unknown2, (176 - 60) / 4};
+	//::llc::array_view<int32_t>									i0432														= {(int32_t*)	worldInfo.Unknown2, (176 - 60) / 4};
+	//::llc::array_view<uint16_t>									u0416														= {(uint16_t*)	worldInfo.Unknown2, (176 - 60) / 2};
+	//::llc::array_view<int16_t>									i0416														= {(int16_t*)	worldInfo.Unknown2, (176 - 60) / 2};
+	//::llc::array_view<float>									f04															= {(float*)		worldInfo.Unknown2, (176 - 60) / 4};
 
 	::llc::array_view<uint32_t>									u032														= {(uint32_t*)	worldObject.part0, (30 * 4) / 4};
 	::llc::array_view<int32_t>									i032														= {(int32_t*)	worldObject.part0, (30 * 4) / 4};
@@ -60,10 +74,9 @@
 	::llc::array_view<int16_t>									i116														= {(int16_t*)	worldObject.somePath, (212 - 169) / 2};
 	::llc::array_view<float>									f1															= {(float*)		worldObject.somePath, (212 - 169) / 4};
 
-	sizeof(SRSWWorldInfo);
 	sizeof(SRSWWorldObject);
-	memcpy(&worldInfo, &input[byteOffset], 176);
-	byteOffset													+= 176;
+	memcpy(&worldInfo, &input[byteOffset], sizeof(SRSWWorldInfo));
+	byteOffset													+= sizeof(SRSWWorldInfo);
 	while(byteOffset < input.size()) {
 		::std::string													modelName											= (const char*)&input[byteOffset]; 
 		byteOffset													+= 40;
@@ -78,7 +91,7 @@
 		info_printf("RSW object found    : %s.", &modelName[0]);
 		info_printf("RSW object position : {%f, %f, %f}.", worldObject.Position	.x, worldObject.Position	.y, worldObject.Position	.z);
 		info_printf("RSW object rotation : {%f, %f, %f}.", worldObject.Rotation	.x, worldObject.Rotation	.y, worldObject.Rotation	.z);
-		info_printf("RSW object scale    : {%f, %f, %f}.", worldObject.Scale		.x, worldObject.Scale		.y, worldObject.Scale		.z);
+		info_printf("RSW object scale    : {%f, %f, %f}.", worldObject.Scale	.x, worldObject.Scale		.y, worldObject.Scale		.z);
 		info_printf("RSW object unk0     : %i.", worldObject.u0);
 		info_printf("RSW object unk1     : %f.", worldObject.uf0);
 	}

@@ -10,7 +10,9 @@ namespace llc
 {
 #pragma pack(push, 1)
 	struct SRSWWorldObject {
-					char													part0											[30 * 4		];
+					char													part0											[40];
+					char													part1											[40];
+					char													part2											[40];
 					::llc::SCoord3<float>									Position										;
 					::llc::SCoord3<float>									Rotation										;
 					::llc::SCoord3<float>									Scale											;

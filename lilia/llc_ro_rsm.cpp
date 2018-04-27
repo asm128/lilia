@@ -164,7 +164,7 @@ struct SRSMHeader {	// RSM Header
 	info_printf("Total Vertices        : %u.", totalVertices	);
 	info_printf("Total UVs             : %u.", totalUVs			);
 	info_printf("Total Faces           : %u.", totalFaces		);
-	info_printf("Total Node bytes read : %u.", byteOffset - byteOffsetStartModel);
+	info_printf("Total Node bytes read : %u.", (byteOffset - byteOffsetStartModel));
 	return byteOffset;
 }
 
