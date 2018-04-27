@@ -32,12 +32,26 @@ namespace llc
 	//				::std::string											Name;
 	//};
 
+	struct SModelInfoRSW {
+					::std::string											Name		;
+					int32_t													AnimType	;	
+					float													AnimSpeed	;
+					int32_t													BlockType	;
+					::std::string											Filename;
+					::std::string											Str2;
+					::std::string											RootRSMNode;
+					::std::string											Str4;
+					::llc::SCoord3<float>									Position;
+					::llc::SCoord3<float>									Rotation;
+					::llc::SCoord3<float>									Scale;
+	};
+
 	struct SRSWFileContents {
 					::std::string											INIFilename;
 					::std::string											GNDFilename;
 					::std::string											GATFilename;
-					::llc::array_obj<::std::string>							RSWFilenames;
-					::llc::array_pod<SRSWWorldObject>						RSWObjects;
+					::std::string											SOMFilename;
+					::llc::array_obj<SModelInfoRSW>							RSWModels;
 	};
 
 				::llc::error_t											rswFileLoad								(::llc::SRSWFileContents& loaded, const ::llc::array_view<ubyte_t>	& input);

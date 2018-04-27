@@ -75,7 +75,7 @@
 
 			::llc::error_t								llc::gndFileLoad											(::llc::SGNDFileContents& loaded, const ::llc::view_const_string	& input)							{ 
 	FILE														* fp												= 0;
-	ree_if(0 != fopen_s(&fp, input.begin(), "rb"), "Cannot open .gnd file: %s.", input.begin());
+	ree_if(0 != fopen_s(&fp, input.begin(), "rb") || 0 == fp, "Cannot open .gnd file: %s.", input.begin());
 
 	fseek(fp, 0, SEEK_END);
 	int32_t														fileSize											= (int32_t)ftell(fp);

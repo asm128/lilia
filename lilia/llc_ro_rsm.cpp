@@ -49,7 +49,7 @@ struct SRSMHeader {	// RSM Header
 	uint32_t													totalUVs													= 0;
 	uint32_t													totalFaces													= 0;
 	uint32_t													byteOffsetStartModel										= byteOffset;
-	while(byteOffset < input.size()) {
+	while(byteOffset < (input.size() - 40)) {
 		::llc::SRSMNode												newNode														= {};
 		const char													* modelName													= (const char*)&input[byteOffset];
 		byteOffset												+= 40;
