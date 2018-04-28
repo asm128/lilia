@@ -67,9 +67,8 @@ struct SRSMHeader {	// RSM Header
 	uint32_t													totalUVs													= 0;
 	uint32_t													totalFaces													= 0;
 	uint32_t													byteOffsetStartModel										= byteOffset;
-	uint32_t													meshCountIBelieve											= 0;
-
-	while(byteOffset < (input.size() - 40)) {
+	uint32_t													meshCountIBelieve											= 1;
+	while(byteOffset < (input.size() - 40) && iMesh < meshCountIBelieve) {
 		::llc::SRSMNode												newNode														= {};
 		const char													* modelName													= (const char*)&input[byteOffset];
 		byteOffset												+= 40;
@@ -87,7 +86,7 @@ struct SRSMHeader {	// RSM Header
 		info_printf("Parent node name: %s.", parentName);
 		if(0 == iMesh) {
 			{
-				ubyte_t														uUnknown[3 * 4];
+				ubyte_t														uUnknown[12];
 				memcpy(uUnknown, &input[byteOffset], ::llc::size(uUnknown));
 				byteOffset												+= ::llc::size(uUnknown);
 				analyzeArray(uUnknown);
@@ -95,7 +94,7 @@ struct SRSMHeader {	// RSM Header
 				//	info_printf("Unknown: %u.", uUnknown[i]);
 			}
 			{
-				ubyte_t														iUnknown[7 * 4];
+				ubyte_t														iUnknown[28];
 				memcpy(iUnknown, &input[byteOffset], ::llc::size(iUnknown));
 				byteOffset												+= ::llc::size(iUnknown);
 				//analyzeArray(iUnknown);
