@@ -54,7 +54,7 @@ struct SRSMHeader {	// RSM Header
 		const char													* modelName													= (const char*)&input[byteOffset];
 		byteOffset												+= 40;
 		newNode.Name											= modelName;
-		info_printf("---------------------------------------------- Reading mesh node ----------------------------------------------", modelName);
+		info_printf("---------------------------------------------- Reading mesh node: %u ----------------------------------------------", (uint32_t)iMesh);
 		info_printf("Mesh node name: %s.", modelName);
 		if(0 == iMesh) {
 			uint32_t													unknown														= *(uint32_t*)&input[byteOffset];			// Get the number of textures

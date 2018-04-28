@@ -102,7 +102,9 @@
 	//memcpy(&worldInfo, &input[byteOffset], sizeof(SRSWWorldInfo));
 	//byteOffset													+= sizeof(SRSWWorldInfo);
 	SModelInfoRSW												modelInfo;
-
+	SLightInfoRSW												lightInfo;
+	SEffectInfoRSW												effectInfo;
+	SSoundInfoRSW												soundInfo;
 	while(byteOffset < input.size()) {
 		int32_t														objectType											= *(int32_t	*)&input[byteOffset]; 
 		byteOffset												+= sizeof(int32_t);
@@ -123,30 +125,73 @@
 			memcpy(&modelInfo.Rotation	, &input[byteOffset], sizeof(float) * 3); byteOffset += sizeof(float) * 3;
 			memcpy(&modelInfo.Scale		, &input[byteOffset], sizeof(float) * 3); byteOffset += sizeof(float) * 3;
 			info_printf(" ---------------------------------------------------------------------------------- RSW Model: %u ---------------------------------------------------------------------------------- ", loaded.RSWModels.size());
-			info_printf("RSW object found     : %s.", &modelInfo.Name[0]);
-			info_printf("RSW object filename  : %s.", &modelInfo.Filename[0]);
-			info_printf("RSW object str2      : %s.", &modelInfo.Str2[0]);
-			info_printf("RSW object str3      : %s.", &modelInfo.RootRSMNode[0]);
-			info_printf("RSW object str4      : %s.", &modelInfo.Str4[0]);
-			info_printf("RSW object position  : {%f, %f, %f}.", modelInfo.Position	.x, modelInfo.Position	.y, modelInfo.Position	.z);
-			info_printf("RSW object rotation  : {%f, %f, %f}.", modelInfo.Rotation	.x, modelInfo.Rotation	.y, modelInfo.Rotation	.z);
-			info_printf("RSW object scale     : {%f, %f, %f}.", modelInfo.Scale		.x, modelInfo.Scale		.y, modelInfo.Scale		.z);
-			info_printf("RSW object animType  : %i.", modelInfo.AnimType );
-			info_printf("RSW object animSpeed : %f.", modelInfo.AnimSpeed);
-			info_printf("RSW object blockType : %i.", modelInfo.BlockType);
+			info_printf("RSW model object found     : %s.", &modelInfo.Name[0]);
+			info_printf("RSW model object filename  : %s.", &modelInfo.Filename[0]);
+			info_printf("RSW model object str2      : %s.", &modelInfo.Str2[0]);
+			info_printf("RSW model object str3      : %s.", &modelInfo.RootRSMNode[0]);
+			info_printf("RSW model object str4      : %s.", &modelInfo.Str4[0]);
+			info_printf("RSW model object position  : {%f, %f, %f}.", modelInfo.Position	.x, modelInfo.Position	.y, modelInfo.Position	.z);
+			info_printf("RSW model object rotation  : {%f, %f, %f}.", modelInfo.Rotation	.x, modelInfo.Rotation	.y, modelInfo.Rotation	.z);
+			info_printf("RSW model object scale     : {%f, %f, %f}.", modelInfo.Scale		.x, modelInfo.Scale		.y, modelInfo.Scale		.z);
+			info_printf("RSW model object animType  : %i.", modelInfo.AnimType );
+			info_printf("RSW model object animSpeed : %f.", modelInfo.AnimSpeed);
+			info_printf("RSW model object blockType : %i.", modelInfo.BlockType);
 			if(0 == modelInfo.Filename[0])
 				return 0;
 			loaded.RSWModels.push_back(modelInfo);
 			break;
 		case	2	: // Light
+			lightInfo												= *(SLightInfoRSW*)&input[byteOffset];
+			byteOffset												+= sizeof(SLightInfoRSW);
+			info_printf(" ---------------------------------------------------------------------------------- RSW Light: %u ---------------------------------------------------------------------------------- ", loaded.RSWLights.size());
+			info_printf("RSW light object found     : %s."			, &lightInfo.Name[0]);
+			info_printf("RSW light object todo      : %s."			, lightInfo.ToDo);
+			info_printf("RSW light object position  : {%f, %f, %f}.", lightInfo.Position	.x, lightInfo.Position	.y, lightInfo.Position	.z);
+			info_printf("RSW light object color     : {%f, %f, %f}.", lightInfo.Color		.x, lightInfo.Color		.y, lightInfo.Color		.z);
+			info_printf("RSW light object todo 2    : %f."			, lightInfo.ToDo2);
+			loaded.RSWLights.push_back(lightInfo);
 			break;
 		case	3	: // Sound
+			memcpy(&soundInfo, &input[byteOffset], sizeof(SSoundInfoRSW) - sizeof(float));
+			byteOffset												+= sizeof(SSoundInfoRSW) - sizeof(float);
+			if (header.VersionMajor >= 2) {
+				soundInfo.cycle											= *(float*)&input[byteOffset]; // cycle
+				byteOffset												+= sizeof(float);
+			}
+			loaded.RSWSounds.push_back(soundInfo);
+			info_printf(" ---------------------------------------------------------------------------------- RSW Sound: %u ---------------------------------------------------------------------------------- ", loaded.RSWSounds.size());
+			info_printf("RSW sound object name      : %s."			, &soundInfo.name[0]	);
+			info_printf("RSW sound object strUnk0   : %s."			, &soundInfo.strUnk0[0]   );
+			info_printf("RSW sound object fileName  : %s."			, &soundInfo.fileName[0]	);
+			info_printf("RSW sound object strUnk1   : %s."			, &soundInfo.strUnk1[0]	);
+			info_printf("RSW sound object position  : {%f, %f, %f}.", soundInfo.position	.x, soundInfo.position	.y, soundInfo.position	.z);
+			info_printf("RSW sound object vol       : %f."			, soundInfo.vol);
+			info_printf("RSW sound object width     : %i."			, soundInfo.width);
+			info_printf("RSW sound object height    : %i."			, soundInfo.height);
+			info_printf("RSW sound object range     : %f."			, soundInfo.range);
+			info_printf("RSW sound object cycle     : %f."			, soundInfo.cycle);
 			break;
 		case	4	: // Effect
+			effectInfo												= *(SEffectInfoRSW*)&input[byteOffset];
+			byteOffset												+= sizeof(SEffectInfoRSW);
+			loaded.RSWEffects.push_back(effectInfo);
+			info_printf(" ---------------------------------------------------------------------------------- RSW Effect: %u ---------------------------------------------------------------------------------- ", loaded.RSWEffects.size());
+			info_printf("RSW effect object name     : %s."			, &effectInfo.name[0]	);
+			info_printf("RSW effect object nameUnk  : %s."			, &effectInfo.nameUnk[0]   );
+			info_printf("RSW effect object position : {%f, %f, %f}.", effectInfo.position	.x, effectInfo.position	.y, effectInfo.position	.z);
+			info_printf("RSW effect object id       : %i."			, effectInfo.id		);
+			info_printf("RSW effect object loop     : %f."			, effectInfo.loop	);
+			info_printf("RSW effect object param1   : %f."			, effectInfo.param1	);
+			info_printf("RSW effect object param2   : %f."			, effectInfo.param2	);
+			info_printf("RSW effect object param3   : %f."			, effectInfo.param3	);
+			info_printf("RSW effect object param4   : %f."			, effectInfo.param4	);
 			break;
 		}
 	}
-	info_printf("RSW objects loaded: %u.", loaded.RSWModels.size());
+	info_printf("RSW model  objects loaded: %u.", loaded.RSWModels.size());
+	info_printf("RSW light  objects loaded: %u.", loaded.RSWLights.size());
+	info_printf("RSW sound  objects loaded: %u.", loaded.RSWSounds.size());
+	info_printf("RSW effect objects loaded: %u.", loaded.RSWEffects.size());
 	return 0;
 }
 

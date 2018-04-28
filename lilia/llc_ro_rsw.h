@@ -26,12 +26,47 @@ namespace llc
 					float													part3											;
 					uint8_t													part4											[4];
 	};
+
+	struct SLightInfoRSW {
+		char					Name		[40];
+		char					ToDo		[40];
+		::llc::SCoord3<float>	Position 	;	
+		::llc::SCoord3<float>	Color		;	
+		float					ToDo2		;	
+	};
+
+	struct SEffectInfoRSW {
+		char					name		[40];
+		char					nameUnk		[40];
+		::llc::SCoord3<float>	position	;
+		int						id			;
+		float					loop		;
+		float					param1		;
+		float					param2		;
+		float					param3		;
+		float					param4		;
+	};
+
+	struct SSoundInfoRSW {
+		char					name		[40];	
+		char					strUnk0		[40];	
+		char					fileName	[40];	
+		char					strUnk1		[40];	
+		::llc::SCoord3<float>	position	;		
+		float					vol			;		
+		int32_t					width		;		
+		int32_t					height		;		
+		float					range		;		
+		float					cycle		;			// v >= 2.0
+	};
 #pragma pack(pop)
 	//struct SRSWWorldObject {
 	//				SRSWWorldObjectInfo										Info;
 	//				::std::string											Name;
 	//};
 
+
+	
 	struct SModelInfoRSW {
 					::std::string											Name		;
 					int32_t													AnimType	;	
@@ -51,7 +86,10 @@ namespace llc
 					::std::string											GNDFilename;
 					::std::string											GATFilename;
 					::std::string											SOMFilename;
-					::llc::array_obj<SModelInfoRSW>							RSWModels;
+					::llc::array_obj<SModelInfoRSW	>						RSWModels;
+					::llc::array_obj<SLightInfoRSW	>						RSWLights;
+					::llc::array_obj<SEffectInfoRSW	>						RSWEffects;
+					::llc::array_obj<SSoundInfoRSW	>						RSWSounds;
 	};
 
 				::llc::error_t											rswFileLoad								(::llc::SRSWFileContents& loaded, const ::llc::array_view<ubyte_t>	& input);
