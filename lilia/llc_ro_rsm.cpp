@@ -15,6 +15,24 @@ struct SRSMHeader {	// RSM Header
 };
 #pragma pack(pop)
 
+			
+			::llc::error_t								analyzeArray												(const ::llc::array_view<ubyte_t>& input) {
+	info_printf("---- Analyzing bytes     :"); for(uint32_t iChar = 0; iChar < input.size() / 1; ++iChar) info_printf(  "%.4u : %.4i : 0x%x", (uint32_t)input[iChar], (int32_t)input[iChar], input[iChar]);
+										  
+	info_printf("---- Analyzing shorts    :");			for(uint32_t iChar = 0; iChar < input.size() / 2; ++iChar) info_printf(  "%.6u : %.6i : 0x%.4x" , ((uint16_t	*)input.begin())[iChar], (int32_t)((int16_t	*)input.begin())[iChar], ((uint16_t	*)input.begin())[iChar]);
+	info_printf("---- Analyzing ints      :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x" , ((uint32_t	*)input.begin())[iChar], ((int32_t	*)input.begin())[iChar], ((uint32_t	*)input.begin())[iChar]);
+	//info_printf("---- Analyzing long longs:");			for(uint32_t iChar = 0; iChar < input.size() / 8; ++iChar) info_printf("%.30u : %.30i : 0x%.16x", ((uint64_t	*)input.begin())[iChar], ((int64_t	*)input.begin())[iChar], ((uint64_t	*)input.begin())[iChar]);
+	info_printf("---- Analyzing floats    :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12f : %.12f", ((float		*)input.begin())[iChar], ((float	*)input.begin())[iChar]);
+	info_printf("---- Analyzing doubles   :");			for(uint32_t iChar = 0; iChar < input.size() / 8; ++iChar) info_printf("%.30f : %.30f", ((double	*)input.begin())[iChar], ((double	*)input.begin())[iChar]);
+
+	info_printf("---- Analyzing shifted shorts    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 2; ++iChar) info_printf(  "%.6u : %.6i : 0x%.4x" , ((uint16_t	*)&input[1])[iChar], (int32_t)((int16_t	*)&input[1])[iChar], ((uint16_t	*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted ints      :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x" , ((uint32_t	*)&input[1])[iChar], ((int32_t	*)&input[1])[iChar], ((uint32_t	*)&input[1])[iChar]);
+	//info_printf("---- Analyzing shifted long longs:");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 8; ++iChar) info_printf("%.30u : %.30i : 0x%.16x", ((uint64_t	*)&input[1])[iChar], ((int64_t	*)&input[1])[iChar], ((uint64_t	*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted floats    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12f : %.12f", ((float		*)&input[1])[iChar], ((float	*)&input[1])[iChar]);
+	//info_printf("---- Analyzing shifted doubles   :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 8; ++iChar) info_printf("%.30f : %.30f", ((double		*)&input[1])[iChar], ((double	*)&input[1])[iChar]);
+	return 0;
+}
+
 
 
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
@@ -49,6 +67,8 @@ struct SRSMHeader {	// RSM Header
 	uint32_t													totalUVs													= 0;
 	uint32_t													totalFaces													= 0;
 	uint32_t													byteOffsetStartModel										= byteOffset;
+	uint32_t													meshCountIBelieve											= 0;
+
 	while(byteOffset < (input.size() - 40)) {
 		::llc::SRSMNode												newNode														= {};
 		const char													* modelName													= (const char*)&input[byteOffset];
@@ -57,9 +77,9 @@ struct SRSMHeader {	// RSM Header
 		info_printf("---------------------------------------------- Reading mesh node: %u ----------------------------------------------", (uint32_t)iMesh);
 		info_printf("Mesh node name: %s.", modelName);
 		if(0 == iMesh) {
-			uint32_t													unknown														= *(uint32_t*)&input[byteOffset];			// Get the number of textures
+			meshCountIBelieve										= *(uint32_t*)&input[byteOffset];			// Get the number of textures
 			byteOffset												+= sizeof(uint32_t);
-			info_printf("Unknown 1: %u.", unknown);
+			info_printf("Mesh count maybe?: %u.", meshCountIBelieve);
 		}
 		const char													* parentName												= (const char*)&input[byteOffset];
 		byteOffset												+= 40;
@@ -67,19 +87,20 @@ struct SRSMHeader {	// RSM Header
 		info_printf("Parent node name: %s.", parentName);
 		if(0 == iMesh) {
 			{
-				float														fUnknown[3];
-				memcpy(fUnknown, &input[byteOffset], sizeof(float) * ::llc::size(fUnknown));
-				byteOffset												+= sizeof(float) * ::llc::size(fUnknown);
-				for(uint32_t i=0; i < ::llc::size(fUnknown); ++i)
-					info_printf("Unknown: %f.", fUnknown[i]);
+				ubyte_t														uUnknown[3 * 4];
+				memcpy(uUnknown, &input[byteOffset], ::llc::size(uUnknown));
+				byteOffset												+= ::llc::size(uUnknown);
+				analyzeArray(uUnknown);
+				//for(uint32_t i=0; i < ::llc::size(uUnknown); ++i)
+				//	info_printf("Unknown: %u.", uUnknown[i]);
 			}
 			{
-				int16_t														iUnknown[7 * 2];
-				uint32_t													byteCount													= sizeof(int16_t) * ::llc::size(iUnknown);
-				memcpy(iUnknown, &input[byteOffset], byteCount);
-				byteOffset												+= byteCount;
-				for(uint32_t i=0; i < ::llc::size(iUnknown); ++i)
-					info_printf("Unknown: %i.", (int32_t)iUnknown[i]);
+				ubyte_t														iUnknown[7 * 4];
+				memcpy(iUnknown, &input[byteOffset], ::llc::size(iUnknown));
+				byteOffset												+= ::llc::size(iUnknown);
+				//analyzeArray(iUnknown);
+				//for(uint32_t i=0; i < ::llc::size(iUnknown); ++i)
+				//	info_printf("Unknown: %i.", (int32_t)iUnknown[i]);
 			}
 		}
 		{
