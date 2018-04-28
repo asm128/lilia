@@ -17,19 +17,18 @@ struct SRSMHeader {	// RSM Header
 
 			
 			::llc::error_t								analyzeArray												(const ::llc::array_view<ubyte_t>& input) {
-	info_printf("---- Analyzing bytes     :"); for(uint32_t iChar = 0; iChar < input.size() / 1; ++iChar) info_printf(  "%.4u : %.4i : 0x%x", (uint32_t)input[iChar], (int32_t)input[iChar], input[iChar]);
+	info_printf("---- Analyzing bytes     :"); for(uint32_t iChar = 0; iChar < input.size() / 1; ++iChar) info_printf(  "%.4u : %.4i : 0x%x", (uint32_t)input[iChar], (int32_t)((int8_t*)input.begin())[iChar], input[iChar]);
 										  
 	info_printf("---- Analyzing shorts    :");			for(uint32_t iChar = 0; iChar < input.size() / 2; ++iChar) info_printf(  "%.6u : %.6i : 0x%.4x" , ((uint16_t	*)input.begin())[iChar], (int32_t)((int16_t	*)input.begin())[iChar], ((uint16_t	*)input.begin())[iChar]);
-	info_printf("---- Analyzing ints      :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x" , ((uint32_t	*)input.begin())[iChar], ((int32_t	*)input.begin())[iChar], ((uint32_t	*)input.begin())[iChar]);
-	//info_printf("---- Analyzing long longs:");			for(uint32_t iChar = 0; iChar < input.size() / 8; ++iChar) info_printf("%.30u : %.30i : 0x%.16x", ((uint64_t	*)input.begin())[iChar], ((int64_t	*)input.begin())[iChar], ((uint64_t	*)input.begin())[iChar]);
-	info_printf("---- Analyzing floats    :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12f : %.12f", ((float		*)input.begin())[iChar], ((float	*)input.begin())[iChar]);
-	info_printf("---- Analyzing doubles   :");			for(uint32_t iChar = 0; iChar < input.size() / 8; ++iChar) info_printf("%.30f : %.30f", ((double	*)input.begin())[iChar], ((double	*)input.begin())[iChar]);
+	info_printf("---- Analyzing ints      :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x" , ((uint32_t	*)input.begin())[iChar], ((int32_t			*)input.begin())[iChar], ((uint32_t	*)input.begin())[iChar]);
+	info_printf("---- Analyzing floats    :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12f"					, ((float		*)input.begin())[iChar]);
 
-	info_printf("---- Analyzing shifted shorts    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 2; ++iChar) info_printf(  "%.6u : %.6i : 0x%.4x" , ((uint16_t	*)&input[1])[iChar], (int32_t)((int16_t	*)&input[1])[iChar], ((uint16_t	*)&input[1])[iChar]);
-	info_printf("---- Analyzing shifted ints      :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x" , ((uint32_t	*)&input[1])[iChar], ((int32_t	*)&input[1])[iChar], ((uint32_t	*)&input[1])[iChar]);
-	//info_printf("---- Analyzing shifted long longs:");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 8; ++iChar) info_printf("%.30u : %.30i : 0x%.16x", ((uint64_t	*)&input[1])[iChar], ((int64_t	*)&input[1])[iChar], ((uint64_t	*)&input[1])[iChar]);
-	info_printf("---- Analyzing shifted floats    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12f : %.12f", ((float		*)&input[1])[iChar], ((float	*)&input[1])[iChar]);
-	//info_printf("---- Analyzing shifted doubles   :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 8; ++iChar) info_printf("%.30f : %.30f", ((double		*)&input[1])[iChar], ((double	*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted shorts    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 2; ++iChar) info_printf(  "%.6u : %.6i : 0x%.4x"	, ((uint16_t	*)&input[1])[iChar], (int32_t)((int16_t	*)&input[1])[iChar], ((uint16_t	*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted ints      :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[1])[iChar], ((int32_t			*)&input[1])[iChar], ((uint32_t	*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted floats    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12f : %.12f"			, ((float		*)&input[1])[iChar], ((float			*)&input[1])[iChar]);
+
+	info_printf("---- Analyzing shifted ints      :");	for(uint32_t iChar = 0; iChar < (input.size() - 2) / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[2])[iChar], ((int32_t			*)&input[2])[iChar], ((uint32_t	*)&input[2])[iChar]);
+	info_printf("---- Analyzing shifted floats    :");	for(uint32_t iChar = 0; iChar < (input.size() - 2) / 4; ++iChar) info_printf("%.12f : %.12f"			, ((float		*)&input[2])[iChar], ((float			*)&input[2])[iChar]);
 	return 0;
 }
 
@@ -87,20 +86,25 @@ struct SRSMHeader {	// RSM Header
 		info_printf("Parent node name: %s.", parentName);
 		if(0 == iMesh) {
 			{
-				ubyte_t														uUnknown[12];
-				memcpy(uUnknown, &input[byteOffset], ::llc::size(uUnknown));
-				byteOffset												+= ::llc::size(uUnknown);
-				analyzeArray(uUnknown);
-				//for(uint32_t i=0; i < ::llc::size(uUnknown); ++i)
-				//	info_printf("Unknown: %u.", uUnknown[i]);
+				ubyte_t														uUnknown0[4];
+				memcpy(uUnknown0, &input[byteOffset], ::llc::size(uUnknown0));
+				byteOffset												+= ::llc::size(uUnknown0);
 			}
 			{
-				ubyte_t														iUnknown[28];
-				memcpy(iUnknown, &input[byteOffset], ::llc::size(iUnknown));
-				byteOffset												+= ::llc::size(iUnknown);
-				//analyzeArray(iUnknown);
-				//for(uint32_t i=0; i < ::llc::size(iUnknown); ++i)
-				//	info_printf("Unknown: %i.", (int32_t)iUnknown[i]);
+				float														fUnknown												= *(float*)&input[byteOffset];			// Get the number of textures
+				byteOffset												+= sizeof(uint32_t);
+				info_printf("Unknown float: %f", fUnknown);
+			}
+			{
+				ubyte_t														uUnknown1[4];
+				memcpy(uUnknown1, &input[byteOffset], ::llc::size(uUnknown1));
+				byteOffset												+= ::llc::size(uUnknown1);
+			}
+			{
+				ubyte_t														uUnknown2[28];
+				memcpy(uUnknown2, &input[byteOffset], ::llc::size(uUnknown2));
+				byteOffset												+= ::llc::size(uUnknown2);
+				analyzeArray(uUnknown2);
 			}
 		}
 		{
