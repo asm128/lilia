@@ -36,7 +36,7 @@ struct SRSMHeader {	// RSM Header
 
 
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
-	uint32_t													byteOffset													= 0;
+	int32_t														byteOffset													= 0;
 	SRSMHeader													header														= *(SRSMHeader*)input.begin();
 	byteOffset												+= sizeof(SRSMHeader);
 	uint32_t													textureCount												= *(uint32_t*)&input[byteOffset];			// Get the number of textures
@@ -61,14 +61,15 @@ struct SRSMHeader {	// RSM Header
 		info_printf("Texture %i name: %s.", (int32_t)iTex, texName);
 		byteOffset												+= 40;
 	}
-	int32_t														iMesh														= 0;
 
 	uint32_t													totalVertices												= 0;
 	uint32_t													totalUVs													= 0;
 	uint32_t													totalFaces													= 0;
 	uint32_t													byteOffsetStartModel										= byteOffset;
-	uint32_t													meshCountIBelieve											= 1;
-	while(byteOffset < (input.size() - 40) && iMesh < meshCountIBelieve) {
+
+	int32_t														meshCountIBelieve											= 1;
+	int32_t														iMesh														= 0;
+	while(byteOffset < ((int32_t)input.size() - 40) && iMesh < meshCountIBelieve) {
 		::llc::SRSMNode												newNode														= {};
 		const char													* modelName													= (const char*)&input[byteOffset];
 		byteOffset												+= 40;
