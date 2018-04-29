@@ -28,68 +28,83 @@ namespace llc
 	};
 
 	struct SLightInfoRSW {
-		char					Name		[40];
-		char					ToDo		[40];
-		::llc::SCoord3<float>	Position 	;	
-		::llc::SCoord3<float>	Color		;	
-		float					ToDo2		;	
+					char													Name		[40];
+					char													ToDo		[40];
+					::llc::SCoord3<float>									Position 	;	
+					::llc::SCoord3<float>									Color		;	
+					float													ToDo2		;	
 	};
 
 	struct SEffectInfoRSW {
-		char					name		[40];
-		char					nameUnk		[40];
-		::llc::SCoord3<float>	position	;
-		int						id			;
-		float					loop		;
-		float					param1		;
-		float					param2		;
-		float					param3		;
-		float					param4		;
+					char													name		[40];
+					char													nameUnk		[40];
+					::llc::SCoord3<float>									position	;
+					int														id			;
+					float													loop		;
+					float													param1		;
+					float													param2		;
+					float													param3		;
+					float													param4		;
 	};
 
 	struct SSoundInfoRSW {
-		char					name		[40];	
-		char					strUnk0		[40];	
-		char					fileName	[40];	
-		char					strUnk1		[40];	
-		::llc::SCoord3<float>	position	;		
-		float					vol			;		
-		int32_t					width		;		
-		int32_t					height		;		
-		float					range		;		
-		float					cycle		;			// v >= 2.0
+					char													name		[40];	
+					char													strUnk0		[40];	
+					char													fileName	[40];	
+					char													strUnk1		[40];	
+					::llc::SCoord3<float>									position	;		
+					float													vol			;		
+					int32_t													width		;		
+					int32_t													height		;		
+					float													range		;		
+					float													cycle		;			// v >= 2.0
 	};
-#pragma pack(pop)
-	//struct SRSWWorldObject {
-	//				SRSWWorldObjectInfo										Info;
-	//				::std::string											Name;
-	//};
-
-
 	
 	struct SModelInfoRSW {
 					::std::string											Name		;
-					int32_t													AnimType	;	
-					float													AnimSpeed	;
-					int32_t													BlockType	;
 					::std::string											Filename;
 					::std::string											Str2;
 					::std::string											RootRSMNode;
 					::std::string											Str4;
+					int32_t													AnimType	;	
+					float													AnimSpeed	;
+					int32_t													BlockType	;
 					::llc::SCoord3<float>									Position;
 					::llc::SCoord3<float>									Rotation;
 					::llc::SCoord3<float>									Scale;
 	};
 
+	struct SRSWWorldWater {
+					float													Height		;
+					uint32_t												Type		;
+					float													Amplitude	;
+					float													Speed		;
+					float													Pitch		;
+					uint32_t												TexCycling	;
+	};
+
+	struct SRSWWorldLight {
+					int32_t													Longitude		;
+					int32_t													Latitude		;
+					::llc::SCoord3<float>									Diffuse			;
+					::llc::SCoord3<float>									Ambient			;
+					float													Intensity		;
+	};
+#pragma pack(pop)
+
 	struct SRSWFileContents {
-					::std::string											INIFilename;
-					::std::string											GNDFilename;
-					::std::string											GATFilename;
-					::std::string											SOMFilename;
-					::llc::array_obj<SModelInfoRSW	>						RSWModels;
-					::llc::array_obj<SLightInfoRSW	>						RSWLights;
-					::llc::array_obj<SEffectInfoRSW	>						RSWEffects;
-					::llc::array_obj<SSoundInfoRSW	>						RSWSounds;
+					::std::string											INIFilename	;
+					::std::string											GNDFilename	;
+					::std::string											GATFilename	;
+					::std::string											SOMFilename	;
+
+					::llc::SRSWWorldWater									Water			;
+					::llc::SRSWWorldLight									Light			;
+
+					::llc::array_obj<SModelInfoRSW	>						RSWModels	;
+					::llc::array_obj<SLightInfoRSW	>						RSWLights	;
+					::llc::array_obj<SEffectInfoRSW	>						RSWEffects	;
+					::llc::array_obj<SSoundInfoRSW	>						RSWSounds	;
 	};
 
 				::llc::error_t											rswFileLoad								(::llc::SRSWFileContents& loaded, const ::llc::array_view<ubyte_t>	& input);

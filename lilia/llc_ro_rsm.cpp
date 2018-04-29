@@ -1,5 +1,6 @@
 #include "llc_ro_rsm.h"
 #include "llc_matrix.h"
+#include "llc_stream_view.h"
 
 #include <string>
 
@@ -35,11 +36,12 @@ struct SRSMHeader {	// RSM Header
 
 
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
-	int32_t														byteOffset													= 0;
-	SRSMHeader													header														= *(SRSMHeader*)input.begin();
-	byteOffset												+= sizeof(SRSMHeader);
-	uint32_t													textureCount												= *(uint32_t*)&input[byteOffset];			// Get the number of textures
-	byteOffset												+= sizeof(uint32_t);
+	::llc::stream_view<const ubyte_t>							gnd_stream													= {input.begin(), input.size()};
+	SRSMHeader													header														;
+	gnd_stream.read_pod(header);
+	uint32_t													textureCount												= *(uint32_t*)&input[gnd_stream.CursorPosition];			// Get the number of textures
+	gnd_stream.read_pod(textureCount);
+
 	info_printf("RSM magic number   : %s."		, header.filecode);
 	info_printf("RSM version        : %u.%u."	, header.versionMajor, header.versionMinor);
 	info_printf("RSM animation time : %u."		, (uint32_t)header.AnimLength);
@@ -55,72 +57,58 @@ struct SRSMHeader {	// RSM Header
 
 	loaded.TextureNames.resize(textureCount);
 	for(uint32_t iTex = 0; iTex < textureCount; ++iTex) {
-		const char													* texName													= (const char*)&input[byteOffset];
+		const char													* texName													= (const char*)&input[gnd_stream.CursorPosition];
 		loaded.TextureNames[iTex]								= texName;			// Get the number of textures
 		info_printf("Texture %i name: %s.", (int32_t)iTex, texName);
-		byteOffset												+= 40;
+		gnd_stream.CursorPosition								+= 40;
 	}
 
 	uint32_t													totalVertices												= 0;
 	uint32_t													totalUVs													= 0;
 	uint32_t													totalFaces													= 0;
-	uint32_t													byteOffsetStartModel										= byteOffset;
+	uint32_t													byteOffsetStartModel										= gnd_stream.CursorPosition;
 
 	int32_t														meshCountIBelieve											= 1;
 	int32_t														iMesh														= 0;
-	while(byteOffset < ((int32_t)input.size() - 40) && iMesh < meshCountIBelieve) {
+	while((int32_t)gnd_stream.CursorPosition < ((int32_t)input.size() - 40) && iMesh < meshCountIBelieve) {
 		::llc::SRSMNode												newNode														= {};
-		const char													* modelName													= (const char*)&input[byteOffset];
-		byteOffset												+= 40;
+		const char													* modelName													= (const char*)&input[gnd_stream.CursorPosition];
+		gnd_stream.CursorPosition								+= 40;
 		newNode.Name											= modelName;
 		info_printf("---------------------------------------------- Reading mesh node: %u ----------------------------------------------", (uint32_t)iMesh);
 		info_printf("Mesh node name: %s.", modelName);
 		if(0 == iMesh) {
-			meshCountIBelieve										= *(uint32_t*)&input[byteOffset];			// Get the number of textures
-			byteOffset												+= sizeof(uint32_t);
+			gnd_stream.read_pod(meshCountIBelieve);
 			info_printf("Mesh count maybe?: %u.", meshCountIBelieve);
 		}
-		const char													* parentName												= (const char*)&input[byteOffset];
-		byteOffset												+= 40;
+		const char													* parentName												= (const char*)&input[gnd_stream.CursorPosition];
+		gnd_stream.CursorPosition								+= 40;
 		newNode.ParentName										= parentName;
 		info_printf("Parent node name: %s.", parentName);
 		if(0 == iMesh) {
 			{
 				ubyte_t														uUnknown0[4];
-				memcpy(uUnknown0, &input[byteOffset], ::llc::size(uUnknown0));
-				byteOffset												+= ::llc::size(uUnknown0);
-			}
-			{
-				float														fUnknown												= *(float*)&input[byteOffset];			// Get the number of textures
-				byteOffset												+= sizeof(uint32_t);
+				float														fUnknown												= 0;			// Get the number of textures
+				ubyte_t														uUnknown1[32];
+				gnd_stream.read_pods(uUnknown0, ::llc::size(uUnknown0));
+				gnd_stream.read_pod	(fUnknown);
+				gnd_stream.read_pods(uUnknown1, ::llc::size(uUnknown1));
 				info_printf("Unknown float: %f", fUnknown);
-			}
-			{
-				ubyte_t														uUnknown1[4];
-				memcpy(uUnknown1, &input[byteOffset], ::llc::size(uUnknown1));
-				byteOffset												+= ::llc::size(uUnknown1);
-			}
-			{
-				ubyte_t														uUnknown2[28];
-				memcpy(uUnknown2, &input[byteOffset], ::llc::size(uUnknown2));
-				byteOffset												+= ::llc::size(uUnknown2);
-				analyzeArray(uUnknown2);
+				analyzeArray(uUnknown1);
 			}
 		}
 		{
-			uint32_t													texMappingCount												= *(uint32_t*)&input[byteOffset];			// Get the number of texture indices for this model
+			uint32_t													texMappingCount												= 0;			// Get the number of texture indices for this model
+			gnd_stream.read_pod(texMappingCount);
 			info_printf("Texture index count: %u.", texMappingCount);
-			byteOffset												+= sizeof(uint32_t);
 			if(texMappingCount) {
 				::llc::array_pod<int32_t>									& modelTextures												= newNode.TextureIndices;	
 				modelTextures.resize(texMappingCount);
-				memcpy(modelTextures.begin(), &input[byteOffset], sizeof(uint32_t) * texMappingCount);
-				byteOffset												+= sizeof(uint32_t) * texMappingCount;
+				gnd_stream.read_pods(modelTextures.begin(), texMappingCount);
 			}
 		}
 
-		newNode.Transform										= *(SRSMNodeTransform*)&input[byteOffset];			// Get model transform
-		byteOffset												+= sizeof(SRSMNodeTransform);
+		gnd_stream.read_pod(newNode.Transform);
 		info_printf("Node transform (Row0	): {%f, %f, %f}."		, newNode.Transform.Row0	.x, newNode.Transform.Row0		.y, newNode.Transform.Row0		.z);
 		info_printf("Node transform (Row2	): {%f, %f, %f}."		, newNode.Transform.Row2	.x, newNode.Transform.Row2		.y, newNode.Transform.Row2		.z);
 		info_printf("Node transform (Row1	): {%f, %f, %f}."		, newNode.Transform.Row1	.x, newNode.Transform.Row1		.y, newNode.Transform.Row1		.z);
@@ -128,69 +116,61 @@ struct SRSMHeader {	// RSM Header
 		info_printf("Node transform (Unk	): {%f, %f, %f, %f}."	, newNode.Transform.Unk		.x, newNode.Transform.Unk		.y, newNode.Transform.Unk		.z, newNode.Transform.Unk		.w);
 		info_printf("Node transform (Offset	): {%f, %f, %f}."		, newNode.Transform.Offset	.x, newNode.Transform.Offset	.y, newNode.Transform.Offset	.z);
 		info_printf("Node transform (Scale	): {%f, %f, %f}."		, newNode.Transform.Scale	.x, newNode.Transform.Scale		.y, newNode.Transform.Scale		.z);
-
 		{
-			uint32_t													vertexCount													= *(uint32_t*)&input[byteOffset];			// Get the number of vertex
-			byteOffset												+= sizeof(uint32_t);
+			uint32_t													vertexCount													= 0;			// Get the number of vertex
+			gnd_stream.read_pod(vertexCount);
 			info_printf("Vertex count: %u.", vertexCount);
 			if(vertexCount) {
 				::llc::array_pod<::llc::SCoord3<float>>						& modelVertices												= newNode.Vertices;	
 				modelVertices.resize(vertexCount);
-				memcpy(modelVertices.begin(), &input[byteOffset], sizeof(::llc::SCoord3<float>) * vertexCount);
-				byteOffset												+= sizeof(::llc::SCoord3<float>) * vertexCount;
+				gnd_stream.read_pods(modelVertices.begin(), vertexCount);
 			}
 		}
 		{
-			uint32_t													texVtxCount													= *(uint32_t*)&input[byteOffset];			// Get the number of unk
-			byteOffset												+= sizeof(uint32_t);
+			uint32_t													texVtxCount													= 0;			// Get the number of unk
+			gnd_stream.read_pod(texVtxCount);
 			info_printf("UV coord count: %u.", texVtxCount);
 			if(texVtxCount) {
 				::llc::array_pod<::llc::SCoord3<float>>						& modelUNKs													= newNode.UVs;	
 				modelUNKs.resize(texVtxCount);
-				memcpy(modelUNKs.begin(), &input[byteOffset], sizeof(::llc::SCoord3<float>) * texVtxCount);
-				byteOffset												+= sizeof(::llc::SCoord3<float>) * texVtxCount;
-				//for(uint32_t i=0; i < modelUNKs.size(); ++i)
-				//	info_printf("UV: {%f, %f, %f}.", modelUNKs[i].x, modelUNKs[i].y, modelUNKs[i].z);
-
+				gnd_stream.read_pods(modelUNKs.begin(), texVtxCount);
 			}
 		}
 		{
-			uint32_t													faceCount													= *(uint32_t*)&input[byteOffset];			// Get the number of face
-			byteOffset												+= sizeof(uint32_t);
+			uint32_t													faceCount													= 0;			// Get the number of face
+			gnd_stream.read_pod(faceCount);
 			info_printf("Face count: %u.", faceCount);
 			if(faceCount) {
 				::llc::array_pod<SRSMFace>									& modelFaces												= newNode.Faces;		
 				modelFaces.resize(faceCount);
-				memcpy(modelFaces.begin(), &input[byteOffset], sizeof(SRSMFace) * faceCount);
-				byteOffset												+= sizeof(SRSMFace) * faceCount;
+				gnd_stream.read_pods(modelFaces.begin(), faceCount);
 			}
 		}
 		{
-			uint32_t													keyframeCount												= *(uint32_t*)&input[byteOffset];			// Get the number of keyframe
-			byteOffset												+= sizeof(uint32_t);
+			uint32_t													keyframeCount												= 0;			// Get the number of keyframe
+			gnd_stream.read_pod(keyframeCount);
 			info_printf("Rotation keyframe count: %u.", keyframeCount);
 			if(keyframeCount) {
 				::llc::array_pod<SRSMFrameRotation>							modelKeyframes;	
 				modelKeyframes.resize(keyframeCount);
-				memcpy(modelKeyframes.begin(), &input[byteOffset], sizeof(SRSMFrameRotation) * keyframeCount);
-				byteOffset												+= sizeof(SRSMFrameRotation) * keyframeCount;
+				gnd_stream.read_pods(modelKeyframes.begin(), keyframeCount);
 			}
 		}
 		//	fread (&ntextures, sizeof(int), 1, fp);
 			//	if (main)
 //		fread (ftodo, sizeof(float), 10, fp);
 		loaded.Nodes.push_back(newNode);
-		totalVertices	+= newNode.Vertices	.size();
-		totalUVs		+= newNode.UVs		.size();
-		totalFaces		+= newNode.Faces	.size();
+		totalVertices											+= newNode.Vertices	.size();
+		totalUVs												+= newNode.UVs		.size();
+		totalFaces												+= newNode.Faces	.size();
 
 		++iMesh;
 	}
 	info_printf("Total Vertices        : %u.", totalVertices	);
 	info_printf("Total UVs             : %u.", totalUVs			);
 	info_printf("Total Faces           : %u.", totalFaces		);
-	info_printf("Total Node bytes read : %u.", (byteOffset - byteOffsetStartModel));
-	return byteOffset;
+	info_printf("Total Node bytes read : %u.", (gnd_stream.CursorPosition - byteOffsetStartModel));
+	return gnd_stream.CursorPosition;
 }
 
 

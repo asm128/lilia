@@ -23,36 +23,35 @@ namespace llc
 	ree_if(gndHeader.nMagicHeader != 'NGRG', "Invalid GND file header.");
 #endif
 	ree_if((gndHeader.nVersionMajor < 1) || (gndHeader.nVersionMajor == 1 && gndHeader.nVersionMinor < 5), "Invalid GND file version. Major version: %u, Minor version: %u", (int)gndHeader.nVersionMajor, (int)gndHeader.nVersionMinor);
-	int32_t															byteOffset										= sizeof(::llc::SGNDHeader);
 	uint32_t														nTextureCount									= 0;
 	uint32_t														nTextureStringSize								= 0;
-	byteOffset													+= gnd_stream.read_pod(loaded.Metrics		);
-	byteOffset													+= gnd_stream.read_pod(nTextureCount		);
-	byteOffset													+= gnd_stream.read_pod(nTextureStringSize	);
+	gnd_stream.read_pod(loaded.Metrics		);
+	gnd_stream.read_pod(nTextureCount		);
+	gnd_stream.read_pod(nTextureStringSize	);
 	loaded.TextureNames.resize(nTextureCount);
 	for(uint32_t iTexture = 0; iTexture < nTextureCount; ++iTexture) 
 		loaded.TextureNames[iTexture].resize(nTextureStringSize);
 
 	for(uint32_t iTexture = 0; iTexture < nTextureCount; ++iTexture) 
-		byteOffset													+= gnd_stream.read_pods(&loaded.TextureNames[iTexture][0], nTextureStringSize); 
+		gnd_stream.read_pods(&loaded.TextureNames[iTexture][0], nTextureStringSize); 
 
 	uint32_t														tileCountBrightness								= 0; 
-	byteOffset													+= gnd_stream.read_pod(tileCountBrightness		);
-	byteOffset													+= gnd_stream.read_pod(loaded.LightmapSize.x	);
-	byteOffset													+= gnd_stream.read_pod(loaded.LightmapSize.y	);
-	byteOffset													+= gnd_stream.read_pod(loaded.LightmapTiles		);
+	gnd_stream.read_pod(tileCountBrightness		);
+	gnd_stream.read_pod(loaded.LightmapSize.x	);
+	gnd_stream.read_pod(loaded.LightmapSize.y	);
+	gnd_stream.read_pod(loaded.LightmapTiles		);
 	loaded.lstTileBrightnessData.resize(tileCountBrightness);	
-	byteOffset													+= gnd_stream.read_pods(loaded.lstTileBrightnessData.begin(), loaded.lstTileBrightnessData.size()); 
+	gnd_stream.read_pods(loaded.lstTileBrightnessData.begin(), loaded.lstTileBrightnessData.size()); 
 
 	uint32_t														tileCountSkin									= 0; 
-	byteOffset													+= gnd_stream.read_pod(tileCountSkin);
+	gnd_stream.read_pod(tileCountSkin);
 	loaded.lstTileTextureData	.resize(tileCountSkin);			
-	byteOffset													+= gnd_stream.read_pods(loaded.lstTileTextureData.begin(), loaded.lstTileTextureData.size()); 
+	gnd_stream.read_pods(loaded.lstTileTextureData.begin(), loaded.lstTileTextureData.size()); 
 	
 	uint32_t														tileCountGeometry								= loaded.Metrics.Size.x * loaded.Metrics.Size.y;
 	loaded.lstTileGeometryData.resize(tileCountGeometry); 
 	if( gndHeader.nVersionMajor > 1 || ( gndHeader.nVersionMajor == 1 && gndHeader.nVersionMinor >= 7 ) ) 
-		byteOffset													+= gnd_stream.read_pods(loaded.lstTileGeometryData.begin(), loaded.lstTileGeometryData.size()); 
+		gnd_stream.read_pods(loaded.lstTileGeometryData.begin(), loaded.lstTileGeometryData.size()); 
 	else if( gndHeader.nVersionMajor < 1 || ( gndHeader.nVersionMajor == 1 && gndHeader.nVersionMinor <= 5 ) ) {// it seems old 1.5 format used 16 bit integers
 		for(uint32_t iTile = 0; iTile < tileCountGeometry; ++iTile) {
 			int16_t															top												= -1;
@@ -60,18 +59,18 @@ namespace llc
 			int16_t															front											= -1;
 			int16_t															flags											= -1;
 			::llc::STileGeometryGND											& tileGeometry									= loaded.lstTileGeometryData[iTile];
-			byteOffset													+= gnd_stream.read_pods(tileGeometry.fHeight, 4); 
-			byteOffset													+= gnd_stream.read_pod(top		); 
-			byteOffset													+= gnd_stream.read_pod(right	); 
-			byteOffset													+= gnd_stream.read_pod(front	); 
-			byteOffset													+= gnd_stream.read_pod(flags	); 
+			gnd_stream.read_pods(tileGeometry.fHeight, 4); 
+			gnd_stream.read_pod(top		); 
+			gnd_stream.read_pod(right	); 
+			gnd_stream.read_pod(front	); 
+			gnd_stream.read_pod(flags	); 
 			tileGeometry.SkinMapping.SkinIndexTop						= top	;
 			tileGeometry.SkinMapping.SkinIndexRight						= right	;
 			tileGeometry.SkinMapping.SkinIndexFront						= front	;
 			//tileGeometry.Flags											= flags	;
 		}
 	}
-	return byteOffset;
+	return gnd_stream.CursorPosition;
 }
 
 			::llc::error_t								llc::gndFileLoad											(::llc::SGNDFileContents& loaded, FILE								* input)							{ 
