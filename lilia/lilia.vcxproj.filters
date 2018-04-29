@@ -156,6 +156,9 @@
     <ClInclude Include="llc_ro_rsw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="llc_stream_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="llc_timer.cpp">

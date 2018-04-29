@@ -55,6 +55,7 @@
     <ClInclude Include="llc_ro_rsw.h" />
     <ClInclude Include="llc_runtime.h" />
     <ClInclude Include="llc_scene.h" />
+    <ClInclude Include="llc_stream_view.h" />
     <ClInclude Include="llc_texture.h" />
     <ClInclude Include="llc_timer.h" />
     <ClInclude Include="llc_truetype.h" />

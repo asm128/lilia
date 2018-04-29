@@ -1,64 +1,70 @@
 #include "llc_ro_gnd.h"
 #include "llc_grid_view.h"
+#include "llc_stream_view.h"
+
+namespace llc
+{
+#pragma pack(push, 1)
+	struct SGNDHeader {
+					uint32_t									nMagicHeader									;
+					uint8_t										nVersionMajor									;
+					uint8_t										nVersionMinor									;
+	};
+#pragma pack(pop)
+}// namespace
 
 				::llc::error_t								llc::gndFileLoad										(::llc::SGNDFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
-	uint32_t														nMagicHeader									= *(uint32_t*)input.begin();
+	::llc::stream_view<const ubyte_t>								gnd_stream										= {input.begin(), input.size()};
+	::llc::SGNDHeader												gndHeader										= {};
+	llc_necall(gnd_stream.read_pod(gndHeader), "Cannot read GND header. Corrupt file?");
 #if defined (LLC_ANDROID) || defined(LLC_LINUX)
-	ree_if(nMagicHeader != 0x4E475247UL , "Invalid GND file header.");
+	ree_if(gndHeader.nMagicHeader != 0x4E475247UL , "Invalid GND file header.");
 #elif defined(LLC_WINDOWS)
-	ree_if(nMagicHeader != 'NGRG', "Invalid GND file header.");
+	ree_if(gndHeader.nMagicHeader != 'NGRG', "Invalid GND file header.");
 #endif
-	uint8_t															nVersionMajor									= input[4];
-	uint8_t															nVersionMinor									= input[5];
-	ree_if((nVersionMajor < 1) || (nVersionMajor == 1 && nVersionMinor < 5), "Invalid GND file version. Major version: %u, Minor version: %u", (int)nVersionMajor, (int)nVersionMinor);
-	int32_t															byteOffset										= 6;
+	ree_if((gndHeader.nVersionMajor < 1) || (gndHeader.nVersionMajor == 1 && gndHeader.nVersionMinor < 5), "Invalid GND file version. Major version: %u, Minor version: %u", (int)gndHeader.nVersionMajor, (int)gndHeader.nVersionMinor);
+	int32_t															byteOffset										= sizeof(::llc::SGNDHeader);
 	uint32_t														nTextureCount									= 0;
 	uint32_t														nTextureStringSize								= 0;
-	int32_t 
-		byteCount = (int32_t)sizeof(loaded.Metrics	);	memcpy(&loaded.Metrics		, &input[byteOffset], byteCount);	byteOffset += byteCount;
-		byteCount = (int32_t)sizeof(uint32_t		);	memcpy(&nTextureCount		, &input[byteOffset], byteCount);	byteOffset += byteCount;
-		byteCount = (int32_t)sizeof(uint32_t		);	memcpy(&nTextureStringSize	, &input[byteOffset], byteCount);	byteOffset += byteCount;
+	byteOffset													+= gnd_stream.read_pod(loaded.Metrics		);
+	byteOffset													+= gnd_stream.read_pod(nTextureCount		);
+	byteOffset													+= gnd_stream.read_pod(nTextureStringSize	);
 	loaded.TextureNames.resize(nTextureCount);
 	for(uint32_t iTexture = 0; iTexture < nTextureCount; ++iTexture) 
 		loaded.TextureNames[iTexture].resize(nTextureStringSize);
 
-	byteCount													= nTextureStringSize;
-	for(uint32_t iTexture = 0; iTexture < nTextureCount; ++iTexture) {
-		memcpy(&loaded.TextureNames[iTexture][0], &input[byteOffset], byteCount);
-		byteOffset													+= byteCount;
-	}
+	for(uint32_t iTexture = 0; iTexture < nTextureCount; ++iTexture) 
+		byteOffset													+= gnd_stream.read_pods(&loaded.TextureNames[iTexture][0], nTextureStringSize); 
+
 	uint32_t														tileCountBrightness								= 0; 
-		byteCount = (int32_t)sizeof(uint32_t);			memcpy(&tileCountBrightness		, &input[byteOffset], byteCount);	byteOffset += byteCount;
-		byteCount = (int32_t)sizeof(uint32_t);			memcpy(&loaded.LightmapSize.x	, &input[byteOffset], byteCount);	byteOffset += byteCount;
-		byteCount = (int32_t)sizeof(uint32_t);			memcpy(&loaded.LightmapSize.y	, &input[byteOffset], byteCount);	byteOffset += byteCount;
-		byteCount = (int32_t)sizeof(uint32_t);			memcpy(&loaded.LightmapTiles	, &input[byteOffset], byteCount);	byteOffset += byteCount;
-	loaded.lstTileBrightnessData.resize(tileCountBrightness);	byteCount = (int32_t)(sizeof(STileBrightnessGND) * tileCountBrightness);	memcpy(loaded.lstTileBrightnessData	.begin(), &input[byteOffset], byteCount);	byteOffset += byteCount; 
+	byteOffset													+= gnd_stream.read_pod(tileCountBrightness		);
+	byteOffset													+= gnd_stream.read_pod(loaded.LightmapSize.x	);
+	byteOffset													+= gnd_stream.read_pod(loaded.LightmapSize.y	);
+	byteOffset													+= gnd_stream.read_pod(loaded.LightmapTiles		);
+	loaded.lstTileBrightnessData.resize(tileCountBrightness);	
+	byteOffset													+= gnd_stream.read_pods(loaded.lstTileBrightnessData.begin(), loaded.lstTileBrightnessData.size()); 
 
-	uint32_t														tileCountSkin									= *(uint32_t*)&input[byteOffset]; byteOffset += sizeof(uint32_t); 
-	loaded.lstTileTextureData	.resize(tileCountSkin);			byteCount = (int32_t)(sizeof(STileSkinGND) * tileCountSkin);				memcpy(loaded.lstTileTextureData	.begin(), &input[byteOffset], byteCount);	byteOffset += byteCount; 
-
-	uint32_t														tileCountGeometry								= loaded.Metrics.Size.x * loaded.Metrics.Size.y;//*(uint32_t*)&input[byteOffset]; byteOffset													+= sizeof(uint32_t); 
+	uint32_t														tileCountSkin									= 0; 
+	byteOffset													+= gnd_stream.read_pod(tileCountSkin);
+	loaded.lstTileTextureData	.resize(tileCountSkin);			
+	byteOffset													+= gnd_stream.read_pods(loaded.lstTileTextureData.begin(), loaded.lstTileTextureData.size()); 
+	
+	uint32_t														tileCountGeometry								= loaded.Metrics.Size.x * loaded.Metrics.Size.y;
 	loaded.lstTileGeometryData.resize(tileCountGeometry); 
-	if( nVersionMajor > 1 || ( nVersionMajor == 1 && nVersionMinor >= 7 ) ) {
-		byteCount													= (int32_t)((sizeof(STileGeometryGND)) * tileCountGeometry);		
-		memcpy(loaded.lstTileGeometryData	.begin(), &input[byteOffset], byteCount);	
-		byteOffset													+= byteCount; 
-	}
-	else if( nVersionMajor < 1 || ( nVersionMajor == 1 && nVersionMinor <= 5 ) ) {// it seems old 1.5 format used 16 bit integers
+	if( gndHeader.nVersionMajor > 1 || ( gndHeader.nVersionMajor == 1 && gndHeader.nVersionMinor >= 7 ) ) 
+		byteOffset													+= gnd_stream.read_pods(loaded.lstTileGeometryData.begin(), loaded.lstTileGeometryData.size()); 
+	else if( gndHeader.nVersionMajor < 1 || ( gndHeader.nVersionMajor == 1 && gndHeader.nVersionMinor <= 5 ) ) {// it seems old 1.5 format used 16 bit integers
 		for(uint32_t iTile = 0; iTile < tileCountGeometry; ++iTile) {
 			int16_t															top												= -1;
 			int16_t															right											= -1;
 			int16_t															front											= -1;
 			int16_t															flags											= -1;
-			::llc::STileGeometryGND												& tileGeometry									= loaded.lstTileGeometryData[iTile];
-			byteCount													= (int32_t)(sizeof(float) * 4);		
-			memcpy(tileGeometry.fHeight, &input[byteOffset], byteCount);	
-			byteOffset													+= byteCount; 
-			byteCount													= 2;
-			memcpy( &top	, &input[byteOffset], byteCount);	byteOffset += byteCount; 
-			memcpy( &right	, &input[byteOffset], byteCount);	byteOffset += byteCount; 
-			memcpy( &front	, &input[byteOffset], byteCount);	byteOffset += byteCount; 
-			memcpy( &flags	, &input[byteOffset], byteCount);	byteOffset += byteCount; 
+			::llc::STileGeometryGND											& tileGeometry									= loaded.lstTileGeometryData[iTile];
+			byteOffset													+= gnd_stream.read_pods(tileGeometry.fHeight, 4); 
+			byteOffset													+= gnd_stream.read_pod(top		); 
+			byteOffset													+= gnd_stream.read_pod(right	); 
+			byteOffset													+= gnd_stream.read_pod(front	); 
+			byteOffset													+= gnd_stream.read_pod(flags	); 
 			tileGeometry.SkinMapping.SkinIndexTop						= top	;
 			tileGeometry.SkinMapping.SkinIndexRight						= right	;
 			tileGeometry.SkinMapping.SkinIndexFront						= front	;
