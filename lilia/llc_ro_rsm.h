@@ -21,11 +21,12 @@ namespace llc
 
 	struct SRSMNodeTransform {
 					::llc::SCoord3<float>									Row0;
-					::llc::SCoord3<float>									Row2;
 					::llc::SCoord3<float>									Row1;
-					::llc::SCoord3<float>									Row3;
-					::llc::SQuaternion<float>								Unk;
+					::llc::SCoord3<float>									Row2;
 					::llc::SCoord3<float>									Offset;
+					::llc::SCoord3<float>									Translation;
+					float													Rotation;
+					::llc::SCoord3<float>									RotAxis;
 					::llc::SCoord3<float>									Scale;
 	}; //
 
@@ -33,12 +34,15 @@ namespace llc
 					int														time;
 					::llc::SQuaternion<float>								orientation;
 	};
+	struct SRSMTexCoord {
+					uint32_t												Unknown;
+					::llc::SCoord2<float>									UV;
+	};
 #pragma pack(pop)
-
 	struct SRSMNode {
 					::llc::array_pod<int32_t>								TextureIndices;
 					::llc::array_pod<::llc::SCoord3<float>>					Vertices;
-					::llc::array_pod<::llc::SCoord3<float>>					UVs;
+					::llc::array_pod<::llc::SRSMTexCoord>					UVs;
 					::llc::array_pod<::llc::SRSMFace>						Faces;
 					::std::string											Name;
 					::std::string											ParentName;
@@ -46,6 +50,11 @@ namespace llc
 	};
 
 	struct SRSMFileContents {
+					uint32_t												AnimLength;
+					uint32_t												ShadeType;
+					uint8_t													Alpha;
+					char													Unknown[16];
+
 					::llc::array_obj<::std::string>							TextureNames;
 					::llc::array_obj<::llc::SRSMNode>						Nodes;
 	};

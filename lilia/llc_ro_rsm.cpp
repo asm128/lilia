@@ -9,27 +9,26 @@ struct SRSMHeader {	// RSM Header
 	char										filecode[4];	
 	uint8_t										versionMajor;
 	uint8_t										versionMinor;
-	uint32_t									AnimLength;
-	uint32_t									ShadeType;
-	uint8_t										Alpha;
-	char										todo[16];
 };
 #pragma pack(pop)
 
 			
 			::llc::error_t								analyzeArray												(const ::llc::array_view<ubyte_t>& input) {
-	info_printf("---- Analyzing bytes     :"); for(uint32_t iChar = 0; iChar < input.size() / 1; ++iChar) info_printf(  "%.4u : %.4i : 0x%x", (uint32_t)input[iChar], (int32_t)((int8_t*)input.begin())[iChar], input[iChar]);
+	info_printf("---- Analyzing bytes     :");			for(uint32_t iChar = 0; iChar < input.size() / 1; ++iChar)			info_printf("'%c' : %.4u : %.4i : 0x%x"	, input[iChar] ? input[iChar] : ' ', (uint32_t)input[iChar], (int32_t)((int8_t*)input.begin())[iChar], input[iChar]);
 										  
-	info_printf("---- Analyzing shorts    :");			for(uint32_t iChar = 0; iChar < input.size() / 2; ++iChar) info_printf(  "%.6u : %.6i : 0x%.4x" , ((uint16_t	*)input.begin())[iChar], (int32_t)((int16_t	*)input.begin())[iChar], ((uint16_t	*)input.begin())[iChar]);
-	info_printf("---- Analyzing ints      :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x" , ((uint32_t	*)input.begin())[iChar], ((int32_t			*)input.begin())[iChar], ((uint32_t	*)input.begin())[iChar]);
-	info_printf("---- Analyzing floats    :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar) info_printf("%.12f"					, ((float		*)input.begin())[iChar]);
+	info_printf("---- Analyzing shorts    :");			for(uint32_t iChar = 0; iChar < input.size() / 2; ++iChar)			info_printf(  "%.6u : %.6i : 0x%.4x"	, ((uint16_t	*)&input[0])[iChar], (int32_t)((int16_t	*)input.begin())[iChar], ((uint16_t	*)input.begin())[iChar]);
+	info_printf("---- Analyzing ints      :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar)			info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[0])[iChar], ((int32_t			*)input.begin())[iChar], ((uint32_t	*)input.begin())[iChar]);
+	info_printf("---- Analyzing floats    :");			for(uint32_t iChar = 0; iChar < input.size() / 4; ++iChar)			info_printf("%.12f"						, ((float		*)&input[0])[iChar]);
 
-	info_printf("---- Analyzing shifted shorts    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 2; ++iChar) info_printf(  "%.6u : %.6i : 0x%.4x"	, ((uint16_t	*)&input[1])[iChar], (int32_t)((int16_t	*)&input[1])[iChar], ((uint16_t	*)&input[1])[iChar]);
-	info_printf("---- Analyzing shifted ints      :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[1])[iChar], ((int32_t			*)&input[1])[iChar], ((uint32_t	*)&input[1])[iChar]);
-	info_printf("---- Analyzing shifted floats    :");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar) info_printf("%.12f : %.12f"			, ((float		*)&input[1])[iChar], ((float			*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted shorts (1):");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 2; ++iChar)	info_printf(  "%.6u : %.6i : 0x%.4x"	, ((uint16_t	*)&input[1])[iChar], (int32_t)((int16_t	*)&input[1])[iChar], ((uint16_t	*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted ints   (1):");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar)	info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[1])[iChar], ((int32_t			*)&input[1])[iChar], ((uint32_t	*)&input[1])[iChar]);
+	info_printf("---- Analyzing shifted floats (1):");	for(uint32_t iChar = 0; iChar < (input.size() - 1) / 4; ++iChar)	info_printf("%.12f : %.12f"				, ((float		*)&input[1])[iChar], ((float			*)&input[1])[iChar]);
 
-	info_printf("---- Analyzing shifted ints      :");	for(uint32_t iChar = 0; iChar < (input.size() - 2) / 4; ++iChar) info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[2])[iChar], ((int32_t			*)&input[2])[iChar], ((uint32_t	*)&input[2])[iChar]);
-	info_printf("---- Analyzing shifted floats    :");	for(uint32_t iChar = 0; iChar < (input.size() - 2) / 4; ++iChar) info_printf("%.12f : %.12f"			, ((float		*)&input[2])[iChar], ((float			*)&input[2])[iChar]);
+	info_printf("---- Analyzing shifted ints   (2):");	for(uint32_t iChar = 0; iChar < (input.size() - 2) / 4; ++iChar)	info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[2])[iChar], ((int32_t			*)&input[2])[iChar], ((uint32_t	*)&input[2])[iChar]);
+	info_printf("---- Analyzing shifted floats (2):");	for(uint32_t iChar = 0; iChar < (input.size() - 2) / 4; ++iChar)	info_printf("%.12f : %.12f"				, ((float		*)&input[2])[iChar], ((float			*)&input[2])[iChar]);
+
+	info_printf("---- Analyzing shifted ints   (3):");	for(uint32_t iChar = 0; iChar < (input.size() - 3) / 4; ++iChar)	info_printf("%.12u : %.12i : 0x%.8x"	, ((uint32_t	*)&input[3])[iChar], ((int32_t			*)&input[3])[iChar], ((uint32_t	*)&input[3])[iChar]);
+	info_printf("---- Analyzing shifted floats (3):");	for(uint32_t iChar = 0; iChar < (input.size() - 3) / 4; ++iChar)	info_printf("%.12f : %.12f"				, ((float		*)&input[3])[iChar], ((float			*)&input[3])[iChar]);
 	return 0;
 }
 
@@ -38,23 +37,23 @@ struct SRSMHeader {	// RSM Header
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
 	::llc::stream_view<const ubyte_t>							gnd_stream													= {input.begin(), input.size()};
 	SRSMHeader													header														;
-	gnd_stream.read_pod(header);
+	gnd_stream.read_pod	(header);
+	gnd_stream.read_pod	(loaded.AnimLength);
+	gnd_stream.read_pod	(loaded.ShadeType);
+	if(header.versionMajor > 1 || (header.versionMajor == 1 && header.versionMinor >= 4))
+		gnd_stream.read_pod	(loaded.Alpha);
+	
+	gnd_stream.read_pods(loaded.Unknown);
+
 	uint32_t													textureCount												= *(uint32_t*)&input[gnd_stream.CursorPosition];			// Get the number of textures
-	gnd_stream.read_pod(textureCount);
+	gnd_stream.read_pod	(textureCount);
 
 	info_printf("RSM magic number   : %s."		, header.filecode);
 	info_printf("RSM version        : %u.%u."	, header.versionMajor, header.versionMinor);
-	info_printf("RSM animation time : %u."		, (uint32_t)header.AnimLength);
-	info_printf("RSM shade type     : %u."		, (uint32_t)header.ShadeType);
-	info_printf("RSM alpha          : %u."		, (uint32_t)header.Alpha);
-	for(uint32_t iUnk = 0; iUnk < 4; ++iUnk) 
-		info_printf("RSM unk %u: {%u, %u, %u, %u}.", iUnk
-			, (uint32_t)header.todo[iUnk * 4 + 0]
-			, (uint32_t)header.todo[iUnk * 4 + 1]
-			, (uint32_t)header.todo[iUnk * 4 + 2]
-			, (uint32_t)header.todo[iUnk * 4 + 3]
-			);
-
+	info_printf("RSM animation time : %u."		, (uint32_t)loaded.AnimLength);
+	info_printf("RSM shade type     : %u."		, (uint32_t)loaded.ShadeType);
+	info_printf("RSM alpha          : %u."		, (uint32_t)loaded.Alpha);
+\
 	loaded.TextureNames.resize(textureCount);
 	for(uint32_t iTex = 0; iTex < textureCount; ++iTex) {
 		const char													* texName													= (const char*)&input[gnd_stream.CursorPosition];
@@ -86,16 +85,10 @@ struct SRSMHeader {	// RSM Header
 		newNode.ParentName										= parentName;
 		info_printf("Parent node name: %s.", parentName);
 		if(0 == iMesh) {
-			{
-				ubyte_t														uUnknown0[4];
-				float														fUnknown												= 0;			// Get the number of textures
-				ubyte_t														uUnknown1[32];
-				gnd_stream.read_pods(uUnknown0, ::llc::size(uUnknown0));
-				gnd_stream.read_pod	(fUnknown);
-				gnd_stream.read_pods(uUnknown1, ::llc::size(uUnknown1));
-				info_printf("Unknown float: %f", fUnknown);
-				analyzeArray(uUnknown1);
-			}
+			ubyte_t														uUnknown0[40];
+			gnd_stream.read_pods(uUnknown0, ::llc::size(uUnknown0));
+			//info_printf("Unknown string: %s", uUnknown0);
+			//analyzeArray(uUnknown0);
 		}
 		{
 			uint32_t													texMappingCount												= 0;			// Get the number of texture indices for this model
@@ -109,13 +102,14 @@ struct SRSMHeader {	// RSM Header
 		}
 
 		gnd_stream.read_pod(newNode.Transform);
-		info_printf("Node transform (Row0	): {%f, %f, %f}."		, newNode.Transform.Row0	.x, newNode.Transform.Row0		.y, newNode.Transform.Row0		.z);
-		info_printf("Node transform (Row2	): {%f, %f, %f}."		, newNode.Transform.Row2	.x, newNode.Transform.Row2		.y, newNode.Transform.Row2		.z);
-		info_printf("Node transform (Row1	): {%f, %f, %f}."		, newNode.Transform.Row1	.x, newNode.Transform.Row1		.y, newNode.Transform.Row1		.z);
-		info_printf("Node transform (Row3	): {%f, %f, %f}."		, newNode.Transform.Row3	.x, newNode.Transform.Row3		.y, newNode.Transform.Row3		.z);
-		info_printf("Node transform (Unk	): {%f, %f, %f, %f}."	, newNode.Transform.Unk		.x, newNode.Transform.Unk		.y, newNode.Transform.Unk		.z, newNode.Transform.Unk		.w);
-		info_printf("Node transform (Offset	): {%f, %f, %f}."		, newNode.Transform.Offset	.x, newNode.Transform.Offset	.y, newNode.Transform.Offset	.z);
-		info_printf("Node transform (Scale	): {%f, %f, %f}."		, newNode.Transform.Scale	.x, newNode.Transform.Scale		.y, newNode.Transform.Scale		.z);
+		info_printf("Node transform (Row0	): {%f, %f, %f}."		, newNode.Transform.Row0		.x, newNode.Transform.Row0			.y, newNode.Transform.Row0			.z);
+		info_printf("Node transform (Row1	): {%f, %f, %f}."		, newNode.Transform.Row1		.x, newNode.Transform.Row1			.y, newNode.Transform.Row1			.z);
+		info_printf("Node transform (Row2	): {%f, %f, %f}."		, newNode.Transform.Row2		.x, newNode.Transform.Row2			.y, newNode.Transform.Row2			.z);
+		info_printf("Node offset             : {%f, %f, %f}."		, newNode.Transform.Offset		.x, newNode.Transform.Offset		.y, newNode.Transform.Offset		.z);
+		info_printf("Node translation        : {%f, %f, %f}."		, newNode.Transform.Translation	.x, newNode.Transform.Translation	.y, newNode.Transform.Translation	.z);
+		info_printf("Node rotation value     : %f."					, newNode.Transform.Rotation);
+		info_printf("Node rotation axis      : {%f, %f, %f}."		, newNode.Transform.RotAxis		.x, newNode.Transform.RotAxis		.y, newNode.Transform.RotAxis		.z);
+		info_printf("Node scale              : {%f, %f, %f}."		, newNode.Transform.Scale		.x, newNode.Transform.Scale			.y, newNode.Transform.Scale			.z);
 		{
 			uint32_t													vertexCount													= 0;			// Get the number of vertex
 			gnd_stream.read_pod(vertexCount);
@@ -131,9 +125,16 @@ struct SRSMHeader {	// RSM Header
 			gnd_stream.read_pod(texVtxCount);
 			info_printf("UV coord count: %u.", texVtxCount);
 			if(texVtxCount) {
-				::llc::array_pod<::llc::SCoord3<float>>						& modelUNKs													= newNode.UVs;	
+				::llc::array_pod<::llc::SRSMTexCoord>						& modelUNKs													= newNode.UVs;	
 				modelUNKs.resize(texVtxCount);
-				gnd_stream.read_pods(modelUNKs.begin(), texVtxCount);
+				if((header.versionMajor == 1 && header.versionMinor >= 2) || header.versionMajor > 1) //{ >= v1.2
+					gnd_stream.read_pods(modelUNKs.begin(), texVtxCount);
+				else {
+					for( uint32_t iVertex = 0; iVertex < texVtxCount; ++iVertex ) {
+						modelUNKs[iVertex].Unknown								= -1;
+						gnd_stream.read_pod(modelUNKs[iVertex].UV);
+					}
+				}
 			}
 		}
 		{
