@@ -131,8 +131,9 @@ struct SRSMHeader {	// RSM Header
 					gnd_stream.read_pods(modelUNKs.begin(), texVtxCount);
 				else {
 					for( uint32_t iVertex = 0; iVertex < texVtxCount; ++iVertex ) {
-						modelUNKs[iVertex].Unknown								= -1;
-						gnd_stream.read_pod(modelUNKs[iVertex].UV);
+						::llc::SRSMTexCoord											& curTexCoord												= modelUNKs[iVertex]; 
+						curTexCoord.Unknown								= (uint32_t)-1;
+						gnd_stream.read_pod(curTexCoord.UV);
 					}
 				}
 			}
