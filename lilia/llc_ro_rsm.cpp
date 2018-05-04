@@ -32,23 +32,21 @@ struct SRSMHeader {	// RSM Header
 	return 0;
 }
 
-
-
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
 	::llc::stream_view<const ubyte_t>							gnd_stream													= {input.begin(), input.size()};
-	SRSMHeader													header														;
+	SRSMHeader													header														= {};
 	gnd_stream.read_pod	(header);
 	gnd_stream.read_pod	(loaded.AnimLength);
 	gnd_stream.read_pod	(loaded.ShadeType);
 	if(header.versionMajor > 1 || (header.versionMajor == 1 && header.versionMinor >= 4))
 		gnd_stream.read_pod	(loaded.Alpha);
 	
-	gnd_stream.read_pods(loaded.Unknown);
+	gnd_stream.read_pod(loaded.Unknown);
 
-	uint32_t													textureCount												= *(uint32_t*)&input[gnd_stream.CursorPosition];			// Get the number of textures
-	gnd_stream.read_pod	(textureCount);
+	uint32_t													textureCount												= 0;			// Get the number of textures
+	gnd_stream.read_pod(textureCount);
 
-	info_printf("RSM magic number   : %s."		, header.filecode);
+	info_printf("RSM magic number   : %.4s."	, header.filecode);
 	info_printf("RSM version        : %u.%u."	, header.versionMajor, header.versionMinor);
 	info_printf("RSM animation time : %u."		, (uint32_t)loaded.AnimLength);
 	info_printf("RSM shade type     : %u."		, (uint32_t)loaded.ShadeType);
@@ -56,40 +54,28 @@ struct SRSMHeader {	// RSM Header
 \
 	loaded.TextureNames.resize(textureCount);
 	for(uint32_t iTex = 0; iTex < textureCount; ++iTex) {
-		const char													* texName													= (const char*)&input[gnd_stream.CursorPosition];
-		loaded.TextureNames[iTex]								= texName;			// Get the number of textures
-		info_printf("Texture %i name: %s.", (int32_t)iTex, texName);
-		gnd_stream.CursorPosition								+= 40;
+		gnd_stream.read_pod(loaded.TextureNames[iTex].Storage);
+		info_printf("Texture %i name: %s.", (int32_t)iTex, loaded.TextureNames[iTex].Storage);
 	}
+
+	gnd_stream.read_pod(loaded.RootNodeName); 
+
+	int32_t														meshCountIBelieve											= 1;
+	gnd_stream.read_pod(meshCountIBelieve);
 
 	uint32_t													totalVertices												= 0;
 	uint32_t													totalUVs													= 0;
 	uint32_t													totalFaces													= 0;
 	uint32_t													byteOffsetStartModel										= gnd_stream.CursorPosition;
 
-	int32_t														meshCountIBelieve											= 1;
-	int32_t														iMesh														= 0;
-	while((int32_t)gnd_stream.CursorPosition < ((int32_t)input.size() - 40) && iMesh < meshCountIBelieve) {
-		::llc::SRSMNode												newNode														= {};
-		const char													* modelName													= (const char*)&input[gnd_stream.CursorPosition];
-		gnd_stream.CursorPosition								+= 40;
-		newNode.Name											= modelName;
+	loaded.Nodes.resize(meshCountIBelieve);
+	for(int32_t iMesh = 0; iMesh < meshCountIBelieve; ++iMesh) {
+		::llc::SRSMNode												& newNode													= loaded.Nodes[iMesh];
+		gnd_stream.read_pod(newNode.Name		);
+		gnd_stream.read_pod(newNode.ParentName	);
 		info_printf("---------------------------------------------- Reading mesh node: %u ----------------------------------------------", (uint32_t)iMesh);
-		info_printf("Mesh node name: %s.", modelName);
-		if(0 == iMesh) {
-			gnd_stream.read_pod(meshCountIBelieve);
-			info_printf("Mesh count maybe?: %u.", meshCountIBelieve);
-		}
-		const char													* parentName												= (const char*)&input[gnd_stream.CursorPosition];
-		gnd_stream.CursorPosition								+= 40;
-		newNode.ParentName										= parentName;
-		info_printf("Parent node name: %s.", parentName);
-		if(0 == iMesh) {
-			ubyte_t														uUnknown0[40];
-			gnd_stream.read_pods(uUnknown0, ::llc::size(uUnknown0));
-			//info_printf("Unknown string: %s", uUnknown0);
-			//analyzeArray(uUnknown0);
-		}
+		info_printf("Mesh node name: %s."	, newNode.Name			);
+		info_printf("Parent node name: %s."	, newNode.ParentName	);
 		{
 			uint32_t													texMappingCount												= 0;			// Get the number of texture indices for this model
 			gnd_stream.read_pod(texMappingCount);
@@ -97,7 +83,7 @@ struct SRSMHeader {	// RSM Header
 			if(texMappingCount) {
 				::llc::array_pod<int32_t>									& modelTextures												= newNode.TextureIndices;	
 				modelTextures.resize(texMappingCount);
-				gnd_stream.read_pods(modelTextures.begin(), texMappingCount);
+				gnd_stream.read_pod(modelTextures.begin(), texMappingCount);
 			}
 		}
 
@@ -117,7 +103,7 @@ struct SRSMHeader {	// RSM Header
 			if(vertexCount) {
 				::llc::array_pod<::llc::SCoord3<float>>						& modelVertices												= newNode.Vertices;	
 				modelVertices.resize(vertexCount);
-				gnd_stream.read_pods(modelVertices.begin(), vertexCount);
+				gnd_stream.read_pod(modelVertices.begin(), vertexCount);
 			}
 		}
 		{
@@ -128,11 +114,11 @@ struct SRSMHeader {	// RSM Header
 				::llc::array_pod<::llc::SRSMTexCoord>						& modelUNKs													= newNode.UVs;	
 				modelUNKs.resize(texVtxCount);
 				if((header.versionMajor == 1 && header.versionMinor >= 2) || header.versionMajor > 1) //{ >= v1.2
-					gnd_stream.read_pods(modelUNKs.begin(), texVtxCount);
+					gnd_stream.read_pod(modelUNKs.begin(), texVtxCount);
 				else {
 					for( uint32_t iVertex = 0; iVertex < texVtxCount; ++iVertex ) {
 						::llc::SRSMTexCoord											& curTexCoord												= modelUNKs[iVertex]; 
-						curTexCoord.Unknown								= (uint32_t)-1;
+						curTexCoord.Unknown										= (uint32_t)-1;
 						gnd_stream.read_pod(curTexCoord.UV);
 					}
 				}
@@ -145,28 +131,32 @@ struct SRSMHeader {	// RSM Header
 			if(faceCount) {
 				::llc::array_pod<SRSMFace>									& modelFaces												= newNode.Faces;		
 				modelFaces.resize(faceCount);
-				gnd_stream.read_pods(modelFaces.begin(), faceCount);
+				gnd_stream.read_pod(modelFaces.begin(), faceCount);
 			}
 		}
+		if((header.versionMajor == 1 && header.versionMinor >= 5) || (header.versionMajor > 1)) { // >= v1.5 
+			uint32_t													positionFrameCount											= 0;
+			gnd_stream.read_pod(positionFrameCount);
+			_CrtDbgBreak();
+			if(positionFrameCount) {
+				::llc::array_pod<SRSMFramePosition>							& modelKeyframes											= newNode.PositionKeyframes;	
+				gnd_stream.read_pod(modelKeyframes.begin(), positionFrameCount);
+			}
+		}
+
 		{
 			uint32_t													keyframeCount												= 0;			// Get the number of keyframe
 			gnd_stream.read_pod(keyframeCount);
 			info_printf("Rotation keyframe count: %u.", keyframeCount);
 			if(keyframeCount) {
-				::llc::array_pod<SRSMFrameRotation>							modelKeyframes;	
+				::llc::array_pod<SRSMFrameRotation>							& modelKeyframes											= newNode.RotationKeyframes;	
 				modelKeyframes.resize(keyframeCount);
-				gnd_stream.read_pods(modelKeyframes.begin(), keyframeCount);
+				gnd_stream.read_pod(modelKeyframes.begin(), keyframeCount);
 			}
 		}
-		//	fread (&ntextures, sizeof(int), 1, fp);
-			//	if (main)
-//		fread (ftodo, sizeof(float), 10, fp);
-		loaded.Nodes.push_back(newNode);
 		totalVertices											+= newNode.Vertices	.size();
 		totalUVs												+= newNode.UVs		.size();
 		totalFaces												+= newNode.Faces	.size();
-
-		++iMesh;
 	}
 	info_printf("Total Vertices        : %u.", totalVertices	);
 	info_printf("Total UVs             : %u.", totalUVs			);
@@ -199,5 +189,5 @@ struct SRSMHeader {	// RSM Header
 	info_printf("%u", unk);
 
 	info_printf("Parsing RSM file: %s.", input.begin());
-	return rsmFileLoad(loaded, {fileInMemory.begin(), fileInMemory.size() - 8});
+	return rsmFileLoad(loaded, {fileInMemory.begin(), fileInMemory.size()});
 }

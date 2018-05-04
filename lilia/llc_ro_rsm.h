@@ -1,5 +1,6 @@
 #include "llc_array.h"
 #include "llc_coord.h"
+#include "llc_array_static.h"
 
 #include <string>
 
@@ -34,6 +35,12 @@ namespace llc
 					int														time;
 					::llc::SQuaternion<float>								orientation;
 	};
+
+	struct SRSMFramePosition {
+					int														time;
+					::llc::SCoord2<float>									Position;
+	};
+
 	struct SRSMTexCoord {
 					uint32_t												Unknown;
 					::llc::SCoord2<float>									UV;
@@ -44,18 +51,22 @@ namespace llc
 					::llc::array_pod<::llc::SCoord3<float>>					Vertices;
 					::llc::array_pod<::llc::SRSMTexCoord>					UVs;
 					::llc::array_pod<::llc::SRSMFace>						Faces;
-					::std::string											Name;
-					::std::string											ParentName;
+					char_t													Name		[40];
+					char_t													ParentName	[40];
 					::llc::SRSMNodeTransform								Transform;
+					::llc::array_pod<SRSMFrameRotation>						RotationKeyframes;
+					::llc::array_pod<SRSMFramePosition>						PositionKeyframes;
 	};
 
 	struct SRSMFileContents {
 					uint32_t												AnimLength;
 					uint32_t												ShadeType;
 					uint8_t													Alpha;
-					char													Unknown[16];
+					char_t													Unknown[16];
 
-					::llc::array_obj<::std::string>							TextureNames;
+					::llc::array_obj<::llc::array_static<char_t, 40>>		TextureNames;
+
+					char_t													RootNodeName[40];
 					::llc::array_obj<::llc::SRSMNode>						Nodes;
 	};
 				::llc::error_t											rsmFileLoad								(::llc::SRSMFileContents& loaded, const ::llc::array_view<ubyte_t>	& input);

@@ -4,6 +4,7 @@
 #define LLC_ARRAY_STATIC_H_2983749823749826534465243
 namespace llc
 {
+#pragma pack(push, 1)
 	template<typename _tCell, uint32_t _sizeArray>
 	struct array_static	{
 							_tCell						Storage	[_sizeArray]						;
@@ -26,6 +27,7 @@ namespace llc
 		//		Storage[i]										= *(init.begin() + i);
 		//}
 	};
+#pragma pack(pop)
 } // namespace
 
 #endif // LLC_ARRAY_STATIC_H_2983749823749826534465243
