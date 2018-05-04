@@ -113,7 +113,15 @@ namespace llc
 		, TILE_FACE_FACING_LEFT
 		};
 
-			::llc::error_t										gndGenerateFaceGeometry			(const SGNDFileContents& loaded, TILE_FACE_FACING facing_direction, int32_t textureIndex, SModelNodeGND& generated, ::llc::grid_view<::llc::STileMapping> & tileMapping);
+			::llc::error_t										gndGenerateFaceGeometry
+	( const ::llc::array_pod<STileSkinGND		>	lstTileTextureData
+	, const ::llc::array_pod<STileGeometryGND	>	lstTileGeometryData
+	, const ::llc::STiledTerrainMetricsGND			tileMapMetrics
+	, TILE_FACE_FACING								facing_direction
+	, int32_t										textureIndex
+	, SModelNodeGND									& generated
+	, ::llc::grid_view<::llc::STileMapping>			& out_mapping
+	);
 #pragma pack(pop)
 } // namespace
 

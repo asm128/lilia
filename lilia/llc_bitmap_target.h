@@ -229,6 +229,8 @@ namespace llc
 				, ::llc::orient2d3d({triangle.B.Cast<double>(), triangle.A.Cast<double>()}, cellCurrentF)	// Determine barycentric coordinates
 				};
 			double																		proportABC									= proportions.A + proportions.B + proportions.C;
+			if(proportABC == 0)
+				continue;
 			proportions.A															/= proportABC;
 			proportions.B															/= proportABC;
 			proportions.C															/= proportABC;

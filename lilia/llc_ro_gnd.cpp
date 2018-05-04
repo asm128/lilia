@@ -254,8 +254,16 @@ static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX
 	}
 	return 0;
 }
-			::llc::error_t										llc::gndGenerateFaceGeometry						(const ::llc::SGNDFileContents& loaded, TILE_FACE_FACING facing_direction, int32_t textureIndex, SModelNodeGND& generated, ::llc::grid_view<::llc::STileMapping> & out_mapping)	{
-	::llc::grid_view<const ::llc::STileGeometryGND>						geometryView										= {loaded.lstTileGeometryData.begin(), loaded.Metrics.Size};
+			::llc::error_t										llc::gndGenerateFaceGeometry
+	( const ::llc::array_pod<STileSkinGND		>	lstTileTextureData
+	, const ::llc::array_pod<STileGeometryGND	>	lstTileGeometryData
+	, const ::llc::STiledTerrainMetricsGND			tileMapMetrics
+	, TILE_FACE_FACING								facing_direction
+	, int32_t										textureIndex
+	, SModelNodeGND									& generated
+	, ::llc::grid_view<::llc::STileMapping>			& out_mapping
+	) {
+	::llc::grid_view<const ::llc::STileGeometryGND>						geometryView										= {lstTileGeometryData.begin(), tileMapMetrics.Size};
 	for(uint32_t y = 0; y < geometryView.metrics().y; ++y)
 	for(uint32_t x = 0; x < geometryView.metrics().x; ++x) {
 		const ::llc::STileGeometryGND										& geometryTile										= geometryView[y][x];
@@ -283,25 +291,25 @@ static		::llc::error_t									gndGenerateFaceGeometryTop								(uint32_t baseX
 		case TILE_FACE_FACING_TOP	: 
 			if(-1 == geometryTile.SkinMapping.SkinIndexTop)
 				continue;
-			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexTop].TextureIndex)
+			if(textureIndex != -1 && textureIndex != lstTileTextureData[geometryTile.SkinMapping.SkinIndexTop].TextureIndex)
 				continue;
-			::gndGenerateFaceGeometryTop(x, y, loaded.Metrics.TileScale, geometryTile, loaded.lstTileTextureData, generated, out_mapping[y][x]);
+			::gndGenerateFaceGeometryTop(x, y, tileMapMetrics.TileScale, geometryTile, lstTileTextureData, generated, out_mapping[y][x]);
 			break;
 		case TILE_FACE_FACING_BACK	: 
 		case TILE_FACE_FACING_FRONT	: 
 			if(-1 == geometryTile.SkinMapping.SkinIndexFront)
 				continue;
-			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexFront].TextureIndex)
+			if(textureIndex != -1 && textureIndex != lstTileTextureData[geometryTile.SkinMapping.SkinIndexFront].TextureIndex)
 				continue;
-			::gndGenerateFaceGeometryFront(x, y, loaded.Metrics.TileScale, geometryTile, geometryTileFront, loaded.lstTileTextureData, generated, out_mapping[y][x]);
+			::gndGenerateFaceGeometryFront(x, y, tileMapMetrics.TileScale, geometryTile, geometryTileFront, lstTileTextureData, generated, out_mapping[y][x]);
 			break;
 		case TILE_FACE_FACING_LEFT	: 
 		case TILE_FACE_FACING_RIGHT	: 
 			if(-1 == geometryTile.SkinMapping.SkinIndexRight)
 				continue;
-			if(textureIndex != -1 && textureIndex != loaded.lstTileTextureData[geometryTile.SkinMapping.SkinIndexRight].TextureIndex)
+			if(textureIndex != -1 && textureIndex != lstTileTextureData[geometryTile.SkinMapping.SkinIndexRight].TextureIndex)
 				continue;
-			::gndGenerateFaceGeometryRight(x, y, loaded.Metrics.TileScale, geometryTile, geometryTileRight, loaded.lstTileTextureData, generated, out_mapping[y][x]);
+			::gndGenerateFaceGeometryRight(x, y, tileMapMetrics.TileScale, geometryTile, geometryTileRight, lstTileTextureData, generated, out_mapping[y][x]);
 			break;
 		}
 	}

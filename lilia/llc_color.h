@@ -126,7 +126,7 @@ namespace llc
 
 		constexpr									SColorFloat		()																noexcept	= default;
 		constexpr									SColorFloat		(const SColorFloat& color)										noexcept	= default;
-		constexpr									SColorFloat		(float _r, float _g, float _b, float _a=1.0f)					noexcept	: r(_r) ,g(_g) ,b(_b) ,a(_a)																																										{}
+		constexpr									SColorFloat		(float _r, float _g, float _b, float _a=1.0f)					noexcept	: r(::llc::clamp(_r, 0.0f, 1.0f)) ,g(::llc::clamp(_g, 0.0f, 1.0f)) ,b(::llc::clamp(_b, 0.0f, 1.0f)) ,a(::llc::clamp(_a, 0.0f, 1.0f))																{}
 		constexpr									SColorFloat		(uint16_t Color)												noexcept	: SColorFloat(SColorBGR(Color))																																										{}
 		constexpr									SColorFloat		(uint32_t Color)												noexcept	: r(((Color & 0x00FF0000L)>>16)	*(1/255.0f)), g(((Color & 0x0000FF00L)>>8)*(1/255.0f)), b(((Color & 0x000000FFL)>>0)*(1/255.0f)), a(((Color & 0xFF000000L)>>24)*(1/255.0f))							{}
 		constexpr									SColorFloat		(SColorBGRA Color)												noexcept	: r(Color.r * (1/255.0f)), g(Color.g * (1/255.0f)), b(Color.b * (1/255.0f)), a(Color.a * (1/255.0f))																								{}
@@ -153,10 +153,10 @@ namespace llc
 									SColorFloat		operator +		(const SColorBGRA& color)								const	noexcept	{ return ::llc::SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																				}
 									SColorFloat		operator *		(const SColorBGR& color)								const	noexcept	{ return ::llc::SColorFloat{r * (color.r * (1/255.0f)), g * (color.g * (1/255.0f)), b * (color.b * (1/255.0f)), a}.Clamp();																				}
 									SColorFloat		operator +		(const SColorBGR& color)								const	noexcept	{ return ::llc::SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																				}
-		constexpr					SColorFloat		operator *		(const SColorFloat& color)								const	noexcept	{ return ::llc::SColorFloat{::llc::clamp(r * color.r, 0.0f, 1.0f),	::llc::clamp(g * color.g, 0.0f, 1.0f),	::llc::clamp(b * color.b, 0.0f, 1.0f)};													}
-		constexpr					SColorFloat		operator +		(const SColorFloat& color)								const	noexcept	{ return ::llc::SColorFloat{::llc::clamp(r + color.r, 0.0f, 1.0f),	::llc::clamp(g + color.g, 0.0f, 1.0f),	::llc::clamp(b + color.b, 0.0f, 1.0f)};													}
-		constexpr					SColorFloat		operator *		(double scalar)											const	noexcept	{ return ::llc::SColorFloat{(float)::llc::clamp(r * scalar, 0.0, 1.0), (float)::llc::clamp(g * scalar, 0.0, 1.0), (float)::llc::clamp(b * scalar, 0.0, 1.0)};											}
-		constexpr					SColorFloat		operator /		(double scalar)											const				{ return ::llc::SColorFloat{(float)::llc::clamp(r / scalar, 0.0, 1.0), (float)::llc::clamp(g / scalar, 0.0, 1.0), (float)::llc::clamp(b / scalar, 0.0, 1.0)};											}
+		constexpr					SColorFloat		operator *		(const SColorFloat& color)								const	noexcept	{ return ::llc::SColorFloat{::llc::clamp(r * color.r, 0.0f, 1.0f),	::llc::clamp(g * color.g, 0.0f, 1.0f),	::llc::clamp(b * color.b, 0.0f, 1.0f), a};													}
+		constexpr					SColorFloat		operator +		(const SColorFloat& color)								const	noexcept	{ return ::llc::SColorFloat{::llc::clamp(r + color.r, 0.0f, 1.0f),	::llc::clamp(g + color.g, 0.0f, 1.0f),	::llc::clamp(b + color.b, 0.0f, 1.0f), a};													}
+		constexpr					SColorFloat		operator *		(double scalar)											const	noexcept	{ return ::llc::SColorFloat{(float)::llc::clamp(r * scalar, 0.0, 1.0), (float)::llc::clamp(g * scalar, 0.0, 1.0), (float)::llc::clamp(b * scalar, 0.0, 1.0), a};											}
+		constexpr					SColorFloat		operator /		(double scalar)											const				{ return ::llc::SColorFloat{(float)::llc::clamp(r / scalar, 0.0, 1.0), (float)::llc::clamp(g / scalar, 0.0, 1.0), (float)::llc::clamp(b / scalar, 0.0, 1.0), a};											}
 									SColorFloat&	operator *=		(float scalar)													noexcept	{ r = r * scalar;					g = g * scalar;					b = b * scalar;					return Clamp();																					}
 									SColorFloat&	operator /=		(float scalar)																{ r = r / scalar;					g = g / scalar;					b = b / scalar;					return Clamp();																					}
 		constexpr					SColorFloat		operator *		(float scalar)											const	noexcept	{ return ::llc::SColorFloat(::llc::clamp(r * scalar, 0.0f, 1.0f),	::llc::clamp(g * scalar, 0.0f, 1.0f),	::llc::clamp(b * scalar, 0.0f, 1.0f));													}
