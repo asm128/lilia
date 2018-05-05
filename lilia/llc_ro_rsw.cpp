@@ -31,12 +31,12 @@
 	info_printf("RSW version minor: 0x%x.", (uint32_t)header.VersionMinor);
 	info_printf("RSW version number: 0x%x.", (uint32_t)*(uint16_t*)&input[4]);
 	//info_printf("RSW version: 0x%x.", header.Version);
-	loaded.INIFilename										= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition								+= 40;
-	loaded.GNDFilename										= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition								+= 40;
+	rsw_stream.read_pod(loaded.INIFilename);
+	rsw_stream.read_pod(loaded.GNDFilename);
 	if(header.VersionMajor > 1 || (header.VersionMajor == 1 && header.VersionMinor >= 4)) {
-		loaded.GATFilename										= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition								+= 40;
+		rsw_stream.read_pod(loaded.GATFilename);
 	}
-	loaded.SOMFilename										= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition								+= 40;
+	rsw_stream.read_pod(loaded.SOMFilename);
 	info_printf("RSW INI: %s.", &loaded.INIFilename[0]);
 	info_printf("RSW GND: %s.", &loaded.GNDFilename[0]);
 	info_printf("RSW GAT: %s.", &loaded.GATFilename[0]);
@@ -89,19 +89,18 @@
 		default		: break;
 		case	1	: // RSM Model
 			if(header.VersionMajor > 1 || (header.VersionMajor == 1 && header.VersionMinor >= 3)) {
-				modelInfo.Name											= (const char*)&input[rsw_stream.CursorPosition]; 
-				rsw_stream.CursorPosition								+= 40;
+				rsw_stream.read_pod(modelInfo.Name);
 				rsw_stream.read_pod(modelInfo.AnimType	);
 				rsw_stream.read_pod(modelInfo.AnimSpeed	);
 				rsw_stream.read_pod(modelInfo.BlockType	);
 			}
-			modelInfo.Filename										= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition	+= 40;
-			modelInfo.Str2											= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition	+= 40;
-			modelInfo.RootRSMNode									= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition	+= 40;
-			modelInfo.Str4											= (const char*)&input[rsw_stream.CursorPosition]; rsw_stream.CursorPosition	+= 40;
-			rsw_stream.read_pod(modelInfo.Position	);
-			rsw_stream.read_pod(modelInfo.Rotation	);
-			rsw_stream.read_pod(modelInfo.Scale		);
+			rsw_stream.read_pod(modelInfo.Filename		);
+			rsw_stream.read_pod(modelInfo.Str2			);
+			rsw_stream.read_pod(modelInfo.RootRSMNode	);
+			rsw_stream.read_pod(modelInfo.Str4			);
+			rsw_stream.read_pod(modelInfo.Position		);
+			rsw_stream.read_pod(modelInfo.Rotation		);
+			rsw_stream.read_pod(modelInfo.Scale			);
 			info_printf(" ---------------------------------------------------------------------------------- RSW Model: %u ---------------------------------------------------------------------------------- ", loaded.RSWModels.size());
 			info_printf("RSW model object found     : %s.", &modelInfo.Name[0]);
 			info_printf("RSW model object filename  : %s.", &modelInfo.Filename[0]);

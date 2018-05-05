@@ -165,7 +165,6 @@ struct SRSMHeader {	// RSM Header
 	return rsm_stream.CursorPosition;
 }
 
-
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, FILE								* input)							{ 
 	loaded, input;
 	return 0; 
