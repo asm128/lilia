@@ -99,10 +99,10 @@ namespace llc
 					::llc::SRSWWorldWater									Water			;
 					::llc::SRSWWorldLight									Light			;
 
-					::llc::array_obj<SModelInfoRSW	>						RSWModels		;
-					::llc::array_obj<SLightInfoRSW	>						RSWLights		;
-					::llc::array_obj<SEffectInfoRSW	>						RSWEffects		;
-					::llc::array_obj<SSoundInfoRSW	>						RSWSounds		;
+					::llc::array_pod<SModelInfoRSW	>						RSWModels		;
+					::llc::array_pod<SLightInfoRSW	>						RSWLights		;
+					::llc::array_pod<SEffectInfoRSW	>						RSWEffects		;
+					::llc::array_pod<SSoundInfoRSW	>						RSWSounds		;
 	};
 
 				::llc::error_t											rswFileLoad								(::llc::SRSWFileContents& loaded, const ::llc::array_view<ubyte_t>	& input);

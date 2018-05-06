@@ -529,7 +529,7 @@ namespace llc
 				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, Size);
 				if(oldData) {
 					for(uint32_t i = 0, copyCount = ::llc::min(oldCount, newSize); i < copyCount; ++i)
-						new (&newData[i]) _tObj(oldData[i]);
+						new (&newData[i])_tObj{oldData[i]};
 					for(uint32_t i = 0; i < oldCount; ++i)
 						oldData[i].~_tObj();
 				}
@@ -546,7 +546,7 @@ namespace llc
 				Count											= (uint32_t)newSize;
 			}
 			for(uint32_t i = oldCount; i < Count; ++i)
-				new (&Data[i])_tObj(constructorArgs...);
+				new (&Data[i])_tObj{constructorArgs...};
 
 			return (int32_t)Count;
 		}	
