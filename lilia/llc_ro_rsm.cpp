@@ -32,6 +32,30 @@ struct SRSMHeader {	// RSM Header
 	return 0;
 }
 
+// Read rotation keyframes. Not sure how they're expressed though.
+static		::llc::error_t								rsmReadRotationKeyframes									(::llc::stream_view<const ubyte_t>& rsm_stream, ::llc::array_pod<::llc::SRSMFrameRotation> & modelKeyframes)	{
+	uint32_t													keyframeCount												= 0;			// Get the number of keyframe
+	rsm_stream.read_pod(keyframeCount);
+	info_printf("Rotation keyframe count: %u.", keyframeCount);
+	if(keyframeCount) {
+		modelKeyframes.resize(keyframeCount);
+		rsm_stream.read_pod(modelKeyframes.begin(), keyframeCount);
+	}
+	return 0;
+}
+
+// >= v1.5 Read position keyframes
+static		::llc::error_t								rsmReadPositionKeyframes									(::llc::stream_view<const ubyte_t>& rsm_stream, ::llc::array_pod<::llc::SRSMFramePosition> & modelKeyframes)	{
+	uint32_t													positionFrameCount											= 0;
+	rsm_stream.read_pod(positionFrameCount);
+	_CrtDbgBreak();
+	if(positionFrameCount) {
+		modelKeyframes.resize(positionFrameCount);
+		rsm_stream.read_pod(modelKeyframes.begin(), positionFrameCount);
+	}
+	return 0;
+}
+
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, const ::llc::array_view<ubyte_t>	& input)							{
 	::llc::stream_view<const ubyte_t>							rsm_stream													= {input.begin(), input.size()};
 	SRSMHeader													header														= {};
@@ -96,7 +120,7 @@ struct SRSMHeader {	// RSM Header
 		info_printf("Node rotation value     : %f."					, newNode.Transform.Rotation);
 		info_printf("Node rotation axis      : {%f, %f, %f}."		, newNode.Transform.RotAxis		.x, newNode.Transform.RotAxis		.y, newNode.Transform.RotAxis		.z);
 		info_printf("Node scale              : {%f, %f, %f}."		, newNode.Transform.Scale		.x, newNode.Transform.Scale			.y, newNode.Transform.Scale			.z);
-		{
+		{ // Read vertices (positions)
 			uint32_t													vertexCount													= 0;			// Get the number of vertex
 			rsm_stream.read_pod(vertexCount);
 			info_printf("Vertex count: %u.", vertexCount);
@@ -106,7 +130,7 @@ struct SRSMHeader {	// RSM Header
 				rsm_stream.read_pod(modelVertices.begin(), vertexCount);
 			}
 		}
-		{
+		{ // Read vertex attributes (texCoord & ...color?)
 			uint32_t													texVtxCount													= 0;			// Get the number of unk
 			rsm_stream.read_pod(texVtxCount);
 			info_printf("UV coord count: %u.", texVtxCount);
@@ -124,36 +148,35 @@ struct SRSMHeader {	// RSM Header
 				}
 			}
 		}
-		{
+
+		{ // Read Triangle descriptions (vertex/UV indices, texture and other properties)
 			uint32_t													faceCount													= 0;			// Get the number of face
 			rsm_stream.read_pod(faceCount);
 			info_printf("Face count: %u.", faceCount);
 			if(faceCount) {
 				::llc::array_pod<SRSMFace>									& modelFaces												= newNode.Faces;		
 				modelFaces.resize(faceCount);
-				rsm_stream.read_pod(modelFaces.begin(), faceCount);
-			}
-		}
-		if((header.versionMajor == 1 && header.versionMinor >= 5) || (header.versionMajor > 1)) { // >= v1.5 
-			uint32_t													positionFrameCount											= 0;
-			rsm_stream.read_pod(positionFrameCount);
-			_CrtDbgBreak();
-			if(positionFrameCount) {
-				::llc::array_pod<SRSMFramePosition>							& modelKeyframes											= newNode.PositionKeyframes;	
-				rsm_stream.read_pod(modelKeyframes.begin(), positionFrameCount);
+				if((header.versionMajor == 1 && header.versionMinor >= 2) || (header.versionMajor > 1))
+					rsm_stream.read_pod(modelFaces.begin(), faceCount);
+				else {
+					for(uint32_t iFace = 0; iFace < faceCount; ++iFace) {
+						::llc::SRSMFace												& currentFace												= modelFaces[iFace];
+						rsm_stream.read_pod(currentFace.Vertices			);
+						rsm_stream.read_pod(currentFace.UVs					);
+						rsm_stream.read_pod(currentFace.IndexTextureIndex	);
+						rsm_stream.read_pod(currentFace.todo1				);
+						rsm_stream.read_pod(currentFace.TwoSided			);
+						currentFace.SmoothGroup									= -1;	// This isn't defined on version < 1.2
+					}
+				}
 			}
 		}
 
-		{
-			uint32_t													keyframeCount												= 0;			// Get the number of keyframe
-			rsm_stream.read_pod(keyframeCount);
-			info_printf("Rotation keyframe count: %u.", keyframeCount);
-			if(keyframeCount) {
-				::llc::array_pod<SRSMFrameRotation>							& modelKeyframes											= newNode.RotationKeyframes;	
-				modelKeyframes.resize(keyframeCount);
-				rsm_stream.read_pod(modelKeyframes.begin(), keyframeCount);
-			}
-		}
+		if((header.versionMajor == 1 && header.versionMinor >= 5) || (header.versionMajor > 1))
+			rsmReadPositionKeyframes(rsm_stream, newNode.PositionKeyframes);
+
+		rsmReadRotationKeyframes(rsm_stream, newNode.RotationKeyframes);
+
 		totalVertices											+= newNode.Vertices	.size();
 		totalUVs												+= newNode.UVs		.size();
 		totalFaces												+= newNode.Faces	.size();
@@ -172,7 +195,7 @@ struct SRSMHeader {	// RSM Header
 
 			::llc::error_t								llc::rsmFileLoad											(::llc::SRSMFileContents& loaded, const ::llc::view_const_string	& input)							{ 
 	FILE														* fp														= 0;
-	ree_if(0 != fopen_s(&fp, input.begin(), "rb"), "Cannot open .rsm file: %s.", input.begin());
+	ree_if(0 != fopen_s(&fp, input.begin(), "rb") || 0 == fp, "Cannot open .rsm file: %s.", input.begin());
 	fseek(fp, 0, SEEK_END);
 	int32_t														fileSize													= (int32_t)ftell(fp);
 	fseek(fp, 0, SEEK_SET);

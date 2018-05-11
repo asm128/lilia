@@ -16,7 +16,7 @@ namespace llc
 							::HWND													WindowHandle								= {};
 							::WNDCLASSEX											WindowClass									= {};
 
-		static constexpr	const char												WindowClassName	[256]						= "SUGAR_WINDOW";
+		static constexpr	const TCHAR												WindowClassName	[256]						= TEXT("SUGAR_WINDOW");
 #endif
 	};
 

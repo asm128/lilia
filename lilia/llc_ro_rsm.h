@@ -15,10 +15,9 @@ namespace llc
 					int16_t													UVs		[3]			;	// UVs indices? 
 					int16_t													IndexTextureIndex	;	// texture index index
 					int16_t													todo1				;	//
-					int32_t													todo2				;	//
+					int32_t													TwoSided			;	//
 					int32_t													SmoothGroup			;	//
 	};
-
 
 	struct SRSMNodeTransform {
 					::llc::SCoord3<float>									Row0;
@@ -32,13 +31,13 @@ namespace llc
 	}; //
 
 	struct SRSMFrameRotation {
-					int														time;
-					::llc::SQuaternion<float>								orientation;
+					int														Time;
+					::llc::SQuaternion<float>								Orientation;
 	};
 
 	struct SRSMFramePosition {
-					int														time;
-					::llc::SCoord2<float>									Position;
+					int														Time;
+					::llc::SCoord3<float>									Position;
 	};
 
 	struct SRSMTexCoord {

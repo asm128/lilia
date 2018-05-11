@@ -75,19 +75,21 @@ namespace llc
 			);
 	}
 	template <typename _tBase>	static inline				int32_t								podcmp						(const _tBase* pA, const _tBase* pB)							{
-		if (0 == pA && 0 == pB)		
-			return 0;				
-		else if (0 == pA || 0 == pB)
-			return 0x7FFFFFFF;		
-									
+		if(0 == pA)
+			return (0 == pB) ? 0 : 0x7FFFFFFF;
+		else if(0 == pB)
+			return 0x7FFFFFFF;
+										
 		return memcmp(pA, pB, sizeof(_tBase));							
 	}
+
 	template <typename _tBase>	static inline				_tBase*								chkcpy						(_tBase* destination, const _tBase* source, uint32_t count)		{
 			for (uint32_t i = 0; i < count; ++i)
 				if (destination[i] != source[i])
 					destination[i]  = source[i];
 			return destination;
 	}
+
 	template <typename _tBase>								_tBase*								podcpy						(_tBase* dest, const _tBase* source)							{
 		static constexpr	const uint32_t																dataMultiplier				= (uint32_t)get_type_align_multiplier<_tBase>();
 		static constexpr	const uint32_t																typeAlign					= (uint32_t)get_type_align<_tBase>();

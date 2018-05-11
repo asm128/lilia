@@ -88,9 +88,13 @@ namespace llc
 					::llc::SCoord3<float>									Ambient			;
 					float													Intensity		;
 	};
-#pragma pack(pop)
 
 	struct SRSWFileContents {
+					::llc::array_pod<SModelInfoRSW	>						RSWModels		;
+					::llc::array_pod<SLightInfoRSW	>						RSWLights		;
+					::llc::array_pod<SEffectInfoRSW	>						RSWEffects		;
+					::llc::array_pod<SSoundInfoRSW	>						RSWSounds		;
+
 					char_t													INIFilename		[40];
 					char_t													GNDFilename		[40];
 					char_t													GATFilename		[40];
@@ -99,11 +103,8 @@ namespace llc
 					::llc::SRSWWorldWater									Water			;
 					::llc::SRSWWorldLight									Light			;
 
-					::llc::array_pod<SModelInfoRSW	>						RSWModels		;
-					::llc::array_pod<SLightInfoRSW	>						RSWLights		;
-					::llc::array_pod<SEffectInfoRSW	>						RSWEffects		;
-					::llc::array_pod<SSoundInfoRSW	>						RSWSounds		;
 	};
+#pragma pack(pop)
 
 				::llc::error_t											rswFileLoad								(::llc::SRSWFileContents& loaded, const ::llc::array_view<ubyte_t>	& input);
 				::llc::error_t											rswFileLoad								(::llc::SRSWFileContents& loaded, FILE								* input);

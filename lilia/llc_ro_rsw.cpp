@@ -29,7 +29,8 @@
 	info_printf("RSW version: %u.%u.", (uint32_t)header.VersionMajor, (uint32_t)header.VersionMinor);
 	info_printf("RSW version major: 0x%x.", (uint32_t)header.VersionMajor);
 	info_printf("RSW version minor: 0x%x.", (uint32_t)header.VersionMinor);
-	info_printf("RSW version number: 0x%x.", (uint32_t)*(uint16_t*)&input[4]);
+	const uint32_t												promoted													= *(uint16_t*)&input[4];	// I had to put this in a variable because the static analyzer believed I may have been confused with this statement.
+	info_printf("RSW version number: 0x%x.", promoted);
 	//info_printf("RSW version: 0x%x.", header.Version);
 	rsw_stream.read_pod(loaded.INIFilename);
 	rsw_stream.read_pod(loaded.GNDFilename);
@@ -175,7 +176,7 @@
 
 			::llc::error_t								llc::rswFileLoad											(::llc::SRSWFileContents& loaded, const ::llc::view_const_string	& input)							{ 
 	FILE														* fp														= 0;
-	ree_if(0 != fopen_s(&fp, input.begin(), "rb"), "Cannot open .rsm file: %s.", input.begin());
+	ree_if(0 != fopen_s(&fp, input.begin(), "rb") || 0 == fp, "Cannot open .rsm file: %s.", input.begin());
 	fseek(fp, 0, SEEK_END);
 	int32_t														fileSize													= (int32_t)ftell(fp);
 	fseek(fp, 0, SEEK_SET);
