@@ -1,6 +1,6 @@
 #include "llc_array.h"
 #include "llc_grid_view.h"
-#include "llc_bit_array_view.h"
+#include "llc_bit_view.h"
 
 #ifndef LLC_TEXTURE_H_902387498237
 #define LLC_TEXTURE_H_902387498237
@@ -43,11 +43,11 @@ namespace llc
 		typedef				_tTexel												TTexel;
 
 							::llc::array_pod		<_tTexel>					Texels										;
-							::llc::bit_array_view	<_tTexel>					View										;
+							::llc::bit_view	<_tTexel>					View										;
 							uint32_t											Pitch										= 0;
 
 		constexpr																STextureMonochrome							()													= default;
-																				STextureMonochrome							(const ::llc::bit_array_view<_tTexel>& other)		{ 
+																				STextureMonochrome							(const ::llc::bit_view<_tTexel>& other)				{ 
 			Texels																	= other;
 			View																	= {Texels.begin(), Texels.size()};
 			Pitch																	= other.Pitch;
@@ -61,7 +61,7 @@ namespace llc
 			return *this; 
 		}
 
-							::llc::STextureMonochrome<_tTexel>&					operator=									(const ::llc::bit_array_view<_tTexel>& other)		{ 
+							::llc::STextureMonochrome<_tTexel>&					operator=									(const ::llc::bit_view<_tTexel>& other)				{ 
 			Texels																	= other;
 			View																	= {Texels.begin(), Texels.size()};
 			Pitch																	= other.Pitch;

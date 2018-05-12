@@ -34,9 +34,8 @@
 	//info_printf("RSW version: 0x%x.", header.Version);
 	rsw_stream.read_pod(loaded.INIFilename);
 	rsw_stream.read_pod(loaded.GNDFilename);
-	if(header.VersionMajor > 1 || (header.VersionMajor == 1 && header.VersionMinor >= 4)) {
+	if(header.VersionMajor > 1 || (header.VersionMajor == 1 && header.VersionMinor >= 4)) 
 		rsw_stream.read_pod(loaded.GATFilename);
-	}
 	rsw_stream.read_pod(loaded.SOMFilename);
 	info_printf("RSW INI: %s.", &loaded.INIFilename[0]);
 	info_printf("RSW GND: %s.", &loaded.GNDFilename[0]);

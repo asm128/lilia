@@ -29,12 +29,13 @@
     <ClInclude Include="llc_bit.h" />
     <ClInclude Include="llc_bitmap_file.h" />
     <ClInclude Include="llc_bitmap_target.h" />
-    <ClInclude Include="llc_bit_array_view.h" />
+    <ClInclude Include="llc_bit_view.h" />
     <ClInclude Include="llc_camera.h" />
     <ClInclude Include="llc_collision.h" />
     <ClInclude Include="llc_color.h" />
     <ClInclude Include="llc_coord.h" />
     <ClInclude Include="llc_display.h" />
+    <ClInclude Include="llc_encoding.h" />
     <ClInclude Include="llc_frameinfo.h" />
     <ClInclude Include="llc_framework.h" />
     <ClInclude Include="llc_geometry.h" />
@@ -65,6 +66,7 @@
     <ClCompile Include="llc_ascii_target.cpp" />
     <ClCompile Include="llc_bitmap_file.cpp" />
     <ClCompile Include="llc_display.cpp" />
+    <ClCompile Include="llc_encoding.cpp" />
     <ClCompile Include="llc_framework.cpp" />
     <ClCompile Include="llc_geometry.cpp" />
     <ClCompile Include="llc_ro_gnd.cpp" />

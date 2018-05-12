@@ -1,7 +1,7 @@
 #include "llc_array.h"
 #include "llc_coord.h"
 #include "llc_grid_view.h"
-#include "llc_bit_array_view.h"
+#include "llc_bit_view.h"
 #include "llc_grid_copy.h"
 
 #ifndef LLC_GUI_TEXT_H_928734982734
@@ -34,7 +34,7 @@ namespace llc
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	template<typename _tColor>
-	static				::llc::error_t												textLineDrawFixedSizeLit						(::llc::grid_view<_tColor>& bmpTarget, const ::llc::bit_array_view<uint32_t>& viewTextureFont, const ::llc::SCoord2<uint32_t> & viewMetrics, uint32_t characterCellsX, int32_t dstOffsetY, const ::llc::SCoord2<int32_t>& sizeCharCell, const ::llc::view_const_string& text0, const ::llc::SCoord2<int32_t> dstTextOffset, const _tColor& color)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	static				::llc::error_t												textLineDrawFixedSizeLit						(::llc::grid_view<_tColor>& bmpTarget, const ::llc::bit_view<uint32_t>& viewTextureFont, const ::llc::SCoord2<uint32_t> & viewMetrics, uint32_t characterCellsX, int32_t dstOffsetY, const ::llc::SCoord2<int32_t>& sizeCharCell, const ::llc::view_const_string& text0, const ::llc::SCoord2<int32_t> dstTextOffset, const _tColor& color)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 		::llc::array_pod<::llc::SCoord2<uint32_t>>										dstCoords;
 		for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
 			const int32_t																	coordTableX										= text0[iChar] % characterCellsX;
@@ -59,7 +59,7 @@ namespace llc
 	}
 
 	template<typename _tColor>
-	static				::llc::error_t												textLineDrawAlignedFixedSizeLit					(::llc::grid_view<_tColor>& targetView, const ::llc::bit_array_view<uint32_t>& fontAtlas, const ::llc::SCoord2<uint32_t> & viewMetrics, uint32_t lineOffset, const ::llc::SCoord2<uint32_t>& targetSize, const ::llc::SCoord2<int32_t>& sizeCharCell, const ::llc::view_const_string& text0, const _tColor& color)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	static				::llc::error_t												textLineDrawAlignedFixedSizeLit					(::llc::grid_view<_tColor>& targetView, const ::llc::bit_view<uint32_t>& fontAtlas, const ::llc::SCoord2<uint32_t> & viewMetrics, uint32_t lineOffset, const ::llc::SCoord2<uint32_t>& targetSize, const ::llc::SCoord2<int32_t>& sizeCharCell, const ::llc::view_const_string& text0, const _tColor& color)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 		const ::llc::SCoord2<int32_t>														dstTextOffset								= {(int32_t)targetSize.x / 2 - (int32_t)::llc::textLineCalcSize(sizeCharCell, text0) / 2, };
 		uint32_t																			dstOffsetY									= (int32_t)(targetSize.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
 		return ::llc::textLineDrawFixedSizeLit(targetView, fontAtlas, viewMetrics, 32, dstOffsetY, sizeCharCell, text0, dstTextOffset, color);

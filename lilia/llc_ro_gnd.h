@@ -119,7 +119,7 @@ namespace llc
 	, const ::llc::STiledTerrainMetricsGND			tileMapMetrics
 	, TILE_FACE_FACING								facing_direction
 	, int32_t										textureIndex
-	, SModelNodeGND									& generated
+	, ::llc::SModelNodeGND							& generated
 	, ::llc::grid_view<::llc::STileMapping>			& out_mapping
 	);
 #pragma pack(pop)

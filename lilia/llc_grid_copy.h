@@ -1,5 +1,5 @@
 #include "llc_grid_view.h"
-#include "llc_bit_array_view.h"
+#include "llc_bit_view.h"
 
 #ifndef LLC_GRID_COPY_20983429834
 #define LLC_GRID_COPY_20983429834
@@ -54,7 +54,7 @@ namespace llc
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::llc::error_t							grid_copy_alpha_bit			(::llc::grid_view<_tCell>& dst, const ::llc::bit_array_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const _tCell& color, const ::llc::SRectangle2D<_tCoord>& srcRect)		{
+						::llc::error_t							grid_copy_alpha_bit			(::llc::grid_view<_tCell>& dst, const ::llc::bit_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const _tCell& color, const ::llc::SRectangle2D<_tCoord>& srcRect)		{
 		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
 		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
@@ -78,7 +78,7 @@ namespace llc
 	}
 
 	template<typename _tCoord>
-						::llc::error_t							check_bit_raster_contour				(const ::llc::bit_array_view<uint32_t>& src, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, const ::llc::SCoord2<_tCoord> & cellToCheck)		{
+						::llc::error_t							check_bit_raster_contour				(const ::llc::bit_view<uint32_t>& src, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, const ::llc::SCoord2<_tCoord> & cellToCheck)		{
 		::llc::SCoord2<_tCoord>											cellToCheckLeft							= {cellToCheck.x - 1, cellToCheck.y};
 		::llc::SCoord2<_tCoord>											cellToCheckRight						= {cellToCheck.x + 1, cellToCheck.y};
 		::llc::SCoord2<_tCoord>											cellToCheckTop							= {cellToCheck.x, cellToCheck.y + 1};
@@ -106,7 +106,7 @@ namespace llc
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::llc::error_t							grid_raster_alpha_bit_contour	(::llc::grid_view<_tCell>& dst, const ::llc::bit_array_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, ::llc::array_pod<::llc::SCoord2<uint32_t>> & dstCoords)		{
+						::llc::error_t							grid_raster_alpha_bit_contour	(::llc::grid_view<_tCell>& dst, const ::llc::bit_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, ::llc::array_pod<::llc::SCoord2<uint32_t>> & dstCoords)		{
 		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
 		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
@@ -130,7 +130,7 @@ namespace llc
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::llc::error_t							grid_raster_alpha_bit			(::llc::grid_view<_tCell>& dst, const ::llc::bit_array_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, ::llc::array_pod<::llc::SCoord2<uint32_t>> & dstCoords)		{
+						::llc::error_t							grid_raster_alpha_bit			(::llc::grid_view<_tCell>& dst, const ::llc::bit_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, ::llc::array_pod<::llc::SCoord2<uint32_t>> & dstCoords)		{
 		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
 		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
