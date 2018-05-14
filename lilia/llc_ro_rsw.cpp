@@ -25,7 +25,7 @@
 	::llc::stream_view<const ubyte_t>							rsw_stream													= {input.begin(), input.size()};
 	SRSWHeader													header														= {};//*(SRSWHeader*)input.begin();
 	rsw_stream.read_pod(header);//sizeof(SRSWHeader);
-	info_printf("RSW magic number: %s.", header.Filecode);
+	info_printf("RSW magic number: %.4s.", header.Filecode);
 	info_printf("RSW version: %u.%u.", (uint32_t)header.VersionMajor, (uint32_t)header.VersionMinor);
 	info_printf("RSW version major: 0x%x.", (uint32_t)header.VersionMajor);
 	info_printf("RSW version minor: 0x%x.", (uint32_t)header.VersionMinor);
@@ -188,7 +188,7 @@
 	}
 	fclose(fp);
 	uint64_t													unk															= *(uint64_t*)&fileInMemory[fileInMemory.size() - 8];
-	info_printf("Unk64: %u", unk);
+	info_printf("Unk64: 0x%llX.", unk);
 
 	info_printf("Parsing RSW file: %s.", input.begin());
 	return rswFileLoad(loaded, {fileInMemory.begin(), fileInMemory.size() - 8});

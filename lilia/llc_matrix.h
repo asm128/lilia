@@ -9,7 +9,7 @@ namespace llc
 #pragma pack(push, 1)
 	template<typename _tBase>
 	struct SMatrix4 {
-		typedef				SMatrix4<_tBase>	_tMat4;
+		typedef				SMatrix4<_tBase>	_tMat4, TMatrix4;
 		typedef				SCoord3<_tBase>		_TCoord3;
 							_tBase				_11, _12, _13, _14
 								,				_21, _22, _23, _24

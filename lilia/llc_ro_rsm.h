@@ -81,6 +81,7 @@ namespace llc
 					int32_t													RSMNodeIndex	;
 					//::llc::array_pod<int32_t>								SkinIndices		; // one per triangle (VertexIndices.size() / 3)
 	};
+				::llc::error_t											rsmGeometryGenerate						(const ::llc::SRSMFileContents& input, ::llc::array_view<::llc::SModelNodeRSM>& out_generated);
 } // namespace
 
 #endif // LLC_RSM_H_02938402983

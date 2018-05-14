@@ -213,3 +213,30 @@ static		::llc::error_t								rsmReadPositionKeyframes									(::llc::stream_vi
 	info_printf("Parsing RSM file: %s.", input.begin());
 	return rsmFileLoad(loaded, {fileInMemory.begin(), fileInMemory.size()});
 }
+
+			::llc::error_t								llc::rsmGeometryGenerate									(const ::llc::SRSMFileContents& rsmData, ::llc::array_view<::llc::SModelNodeRSM>& out_meshes)			{
+	for(uint32_t iTex = 0, texCount = rsmData.TextureNames.size(); iTex < texCount; ++iTex) {
+		for(uint32_t iNode = 0, countNodes = rsmData.Nodes.size(); iNode < countNodes; ++iNode) {
+			const ::llc::SRSMNode										& rsmNode													= rsmData.Nodes[iNode];
+			::llc::SModelNodeRSM										& meshNode													= out_meshes[iTex * countNodes + iNode];
+			meshNode.RSMNodeIndex									= iNode;
+			meshNode.TextureIndex									= iTex;
+			uint32_t													vertexOffset												= 0;
+			for(uint32_t iFace = 0, countFaces = rsmNode.Faces.size(); iFace < countFaces; ++iFace) {
+				const ::llc::SRSMFace										& face														= rsmNode.Faces[iFace];
+				if(rsmNode.TextureIndices[face.IndexTextureIndex] != (int32_t)iTex)
+					continue;
+				for(uint32_t iVert = 0; iVert < 3; ++iVert) {
+					llc_necall(meshNode.UVs				.push_back(rsmNode.UVs		[face.UVs		[iVert]].UV				), "Out of memory. Invalid RSM input?");
+					llc_necall(meshNode.Vertices		.push_back(rsmNode.Vertices	[face.Vertices	[iVert]]				), "Out of memory. Invalid RSM input?");
+				}
+				llc_necall(meshNode.Normals			.push_back({ (rsmNode.Vertices	[face.Vertices	[1]] - rsmNode.Vertices	[face.Vertices	[0]]).Cross(rsmNode.Vertices	[face.Vertices	[2]] - rsmNode.Vertices	[face.Vertices	[0]]).Normalize() }), "Out of memory. Invalid RSM input?");
+				llc_necall(meshNode.Normals			.push_back({ (rsmNode.Vertices	[face.Vertices	[1]] - rsmNode.Vertices	[face.Vertices	[0]]).Cross(rsmNode.Vertices	[face.Vertices	[2]] - rsmNode.Vertices	[face.Vertices	[0]]).Normalize() }), "Out of memory. Invalid RSM input?");						
+				llc_necall(meshNode.Normals			.push_back({ (rsmNode.Vertices	[face.Vertices	[1]] - rsmNode.Vertices	[face.Vertices	[0]]).Cross(rsmNode.Vertices	[face.Vertices	[2]] - rsmNode.Vertices	[face.Vertices	[0]]).Normalize() }), "Out of memory. Invalid RSM input?");
+				llc_necall(meshNode.VertexIndices	.push_back({vertexOffset, vertexOffset + 1, vertexOffset + 2}), "Out of memory. Invalid RSM input?");
+				vertexOffset											+= 3;
+			}
+		}
+	}
+	return 0;			
+}
