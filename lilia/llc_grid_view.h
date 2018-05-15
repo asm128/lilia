@@ -35,8 +35,8 @@ namespace llc
 
 		inline constexpr	const ::llc::SCoord2<uint32_t>&			metrics						()																	const	noexcept	{ return Size;						}
 		inline constexpr	uint32_t								size						()																	const	noexcept	{ return Size.x * Size.y;			}
-		inline constexpr	uint32_t								width						()																	const	noexcept	{ return Size.x;					}
-		inline constexpr	uint32_t								height						()																	const	noexcept	{ return Size.y;					}
+		//inline constexpr	uint32_t								width						()																	const	noexcept	{ return Size.x;					}
+		//inline constexpr	uint32_t								height						()																	const	noexcept	{ return Size.y;					}
 	};
 #pragma pack(pop)
 

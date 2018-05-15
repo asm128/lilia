@@ -30,8 +30,8 @@
 	ree_if(0 == (offscreenDetail.BitmapInfo = (::BITMAPINFO*)::malloc(offscreenDetail.BitmapInfoSize)), "malloc(%u) failed! Out of memory?", offscreenDetail.BitmapInfoSize);
 	memcpy(offscreenDetail.BitmapInfo->bmiColors, colorArray.begin(), bytesToCopy);
 	offscreenDetail.BitmapInfo->bmiHeader.biSize													= sizeof(::BITMAPINFO);
-	offscreenDetail.BitmapInfo->bmiHeader.biWidth													= colorArray.width();
-	offscreenDetail.BitmapInfo->bmiHeader.biHeight													= colorArray.height();
+	offscreenDetail.BitmapInfo->bmiHeader.biWidth													= colorArray.metrics().x;
+	offscreenDetail.BitmapInfo->bmiHeader.biHeight													= colorArray.metrics().y;
 	offscreenDetail.BitmapInfo->bmiHeader.biPlanes													= 1;
 	offscreenDetail.BitmapInfo->bmiHeader.biBitCount												= 32;
 	offscreenDetail.BitmapInfo->bmiHeader.biCompression												= BI_RGB;
@@ -48,7 +48,7 @@
 	::HBITMAP																							hBmpOld										= (::HBITMAP)::SelectObject(offscreenDetail.IntermediateDeviceContext, offscreenDetail.IntermediateBitmap);    // <- altering state
 	//error_if(FALSE == ::BitBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, SRCCOPY), "Not sure why would this happen but probably due to mismanagement of the target size or the system resources. I've had it failing when I acquired the device too much and never released it.");
 	::SetStretchBltMode(hdc, COLORONCOLOR);
-	error_if(FALSE == ::StretchBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, colorArray.width(), colorArray.height(), SRCCOPY), "Not sure why would this happen but probably due to mismanagement of the target size or the system resources. I've had it failing when I acquired the device too much and never released it.");
+	error_if(FALSE == ::StretchBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, colorArray.metrics().x, colorArray.metrics().y, SRCCOPY), "Not sure why would this happen but probably due to mismanagement of the target size or the system resources. I've had it failing when I acquired the device too much and never released it.");
 	::SelectObject(hdc, hBmpOld);	// put the old bitmap back in the DC (restore state)
 	return 0;
 }

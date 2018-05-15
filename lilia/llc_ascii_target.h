@@ -15,8 +15,8 @@ namespace llc
 								::llc::grid_view<uint8_t>						Characters									= {};
 								::llc::grid_view<uint16_t>						Colors										= {};
 
-		inline constexpr		uint32_t										Width										()																	const	noexcept	{ return Characters.width	(); }
-		inline constexpr		uint32_t										Height										()																	const	noexcept	{ return Characters.height	(); }
+		inline constexpr		uint32_t										Width										()																	const	noexcept	{ return Characters.metrics().x; }
+		inline constexpr		uint32_t										Height										()																	const	noexcept	{ return Characters.metrics().y; }
 	};
 
 							::llc::error_t									asciiTargetCreate							(::llc::SASCIITarget& target, uint32_t width, uint32_t height);

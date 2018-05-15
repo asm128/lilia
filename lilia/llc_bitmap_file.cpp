@@ -10,7 +10,7 @@
 
 	BITMAP																									bm											= {};
 	GetObject(phBitmap, sizeof(BITMAP), &bm);		// Get the color depth of the DIBSection
-	out_Colors.resize(bm.bmWidth * bm.bmHeight);
+	llc_necall(out_Colors.resize(bm.bmWidth * bm.bmHeight), "Out of memory? Requested size: {x: %i, y: %i}", (int32_t)bm.bmWidth, (int32_t)bm.bmHeight);
 	out_ImageView																						= {out_Colors.begin(), {(uint32_t)bm.bmWidth, (uint32_t)bm.bmHeight}};
 	HDC																										hMemDC										= CreateCompatibleDC(NULL);
 	HBITMAP																									hOldBitmap;

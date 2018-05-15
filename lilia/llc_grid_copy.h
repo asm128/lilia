@@ -13,7 +13,7 @@ namespace llc
 			, ::llc::min
 				( ::llc::min
 					( ::llc::min
-						((int32_t)(src.width() - xSrcOffset), (int32_t)(dst.width() - xDstOffset))
+						((int32_t)(src.metrics().x - xSrcOffset), (int32_t)(dst.metrics().x - xDstOffset))
 						, (int32_t)srcRect.Size.x
 						)
 				, (int32_t)dstRect.Size.x
@@ -23,10 +23,10 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy					(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SRectangle2D<_tCoord>& dstRect, const ::llc::SRectangle2D<_tCoord>& srcRect)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
-		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x, 0, (int32_t)src.width());			// 
-		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y), (int32_t)dst.height());
-		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y), (int32_t)src.height());
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.metrics().x);			// 
+		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x, 0, (int32_t)src.metrics().x);			// 
+		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y), (int32_t)dst.metrics().y);
+		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y), (int32_t)src.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src, dstRect, srcRect, xDstOffset, xSrcOffset);
 		uint32_t														elementsCopied				= 0;
 		for(int32_t y = 0, yMax = (int32_t)srcRect.Size.y; y < yMax; ++y) {
@@ -47,7 +47,7 @@ namespace llc
 		return (uint32_t)::llc::max		// Make sure everything is in range.
 			( 0
 			, ::llc::min
-				( ::llc::min((int32_t)(srcMetrics.x - xSrcOffset), (int32_t)(dst.width() - xDstOffset))
+				( ::llc::min((int32_t)(srcMetrics.x - xSrcOffset), (int32_t)(dst.metrics().x - xDstOffset))
 				, (int32_t)srcRect.Size.x
 				)
 			);	// 
@@ -55,7 +55,7 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy_alpha_bit			(::llc::grid_view<_tCell>& dst, const ::llc::bit_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const _tCell& color, const ::llc::SRectangle2D<_tCoord>& srcRect)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.metrics().x);			// 
 		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
 		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, srcMetrics, srcRect, xDstOffset, xSrcOffset);
@@ -65,7 +65,7 @@ namespace llc
 			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
 			if(yDst < 0 || ySrc < 0)
 				continue;
-			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
+			if(yDst >= (int32_t)dst.metrics().y || ySrc >= ySrcLimit) 
 				break;
 			for(uint32_t x = 0, xMax = xCopyCells; x < xMax; ++x) {
 				const uint32_t xSrc = xSrcOffset + x;
@@ -107,7 +107,7 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_raster_alpha_bit_contour	(::llc::grid_view<_tCell>& dst, const ::llc::bit_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, ::llc::array_pod<::llc::SCoord2<uint32_t>> & dstCoords)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.metrics().x);			// 
 		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
 		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, srcMetrics, srcRect, xDstOffset, xSrcOffset);
@@ -117,7 +117,7 @@ namespace llc
 			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
 			if(yDst < 0 || ySrc < 0)
 				continue;
-			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
+			if(yDst >= (int32_t)dst.metrics().y || ySrc >= ySrcLimit) 
 				break;
 			for(uint32_t x = 0, xMax = xCopyCells; x < xMax; ++x) {
 				const uint32_t													xSrc						= xSrcOffset + x;
@@ -131,7 +131,7 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_raster_alpha_bit			(::llc::grid_view<_tCell>& dst, const ::llc::bit_view<uint32_t>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<uint32_t> & srcMetrics, const ::llc::SRectangle2D<_tCoord>& srcRect, ::llc::array_pod<::llc::SCoord2<uint32_t>> & dstCoords)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.metrics().x);			// 
 		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
 		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, srcMetrics, srcRect, xDstOffset, xSrcOffset);
@@ -141,7 +141,7 @@ namespace llc
 			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
 			if(yDst < 0 || ySrc < 0)
 				continue;
-			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
+			if(yDst >= (int32_t)dst.metrics().y || ySrc >= ySrcLimit) 
 				break;
 			for(uint32_t x = 0, xMax = xCopyCells; x < xMax; ++x) {
 				const uint32_t													xSrc						= xSrcOffset + x;
@@ -155,9 +155,9 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy_alpha				(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SRectangle2D<_tCoord>& srcRect, const _tCell& comparand)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
-		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)src.width());			// 
-		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)src.height());
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.metrics().x);			// 
+		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)src.metrics().x);			// 
+		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)src.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src.metrics(), srcRect, xDstOffset, xSrcOffset);
 		uint32_t														elementsCopied				= 0;
 		for(int32_t y = 0, yMax = (int32_t)srcRect.Size.y; y < yMax; ++y) {
@@ -165,7 +165,7 @@ namespace llc
 			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
 			if(yDst < 0 || ySrc < 0)
 				continue;
-			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
+			if(yDst >= (int32_t)dst.metrics().y || ySrc >= ySrcLimit) 
 				break;
 			for(uint32_t x = 0, xMax = xCopyCells; x < xMax; ++x) {
 				const uint32_t xSrc = xSrcOffset + x;
@@ -179,9 +179,9 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy					(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SRectangle2D<_tCoord>& srcRect)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
-		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)src.width());			// 
-		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)src.height());
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.metrics().x);			// 
+		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)src.metrics().x);			// 
+		const int32_t													ySrcLimit					= ::llc::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)src.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src.metrics(), srcRect, xDstOffset, xSrcOffset);
 		uint32_t														elementsCopied				= 0;
 		for(int32_t y = 0, yMax = (int32_t)srcRect.Size.y; y < yMax; ++y) {
@@ -189,7 +189,7 @@ namespace llc
 			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
 			if(yDst < 0 || ySrc < 0)
 				continue;
-			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
+			if(yDst >= (int32_t)dst.metrics().y || ySrc >= ySrcLimit) 
 				break;
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 			elementsCopied												+= xCopyCells;
@@ -199,17 +199,17 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy					(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SRectangle2D<_tCoord>& dstRect, const ::llc::SCoord2<_tCoord>& srcOffset)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x		, 0, (int32_t)dst.width());			// 
-		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcOffset.x			, 0, (int32_t)src.width());			// 
-		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.height());
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x		, 0, (int32_t)dst.metrics().x);			// 
+		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcOffset.x			, 0, (int32_t)src.metrics().x);			// 
+		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src.metrics(), dstRect, xDstOffset, xSrcOffset);
 		uint32_t														elementsCopied				= 0;
-		for(int32_t y = 0, yMax = src.height(); y < yMax; ++y) {
+		for(int32_t y = 0, yMax = src.metrics().y; y < yMax; ++y) {
 			const int32_t													yDst						= y + (int32_t)dstRect.Offset.y;
 			const int32_t													ySrc						= y + (int32_t)srcOffset.y;
 			if(yDst < 0 || ySrc < 0)
 				continue;
-			if(yDst >= yDstLimit || ySrc >= (int32_t)src.height()) 
+			if(yDst >= yDstLimit || ySrc >= (int32_t)src.metrics().y) 
 				break;
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 			elementsCopied												+= xCopyCells;
@@ -221,19 +221,19 @@ namespace llc
 						uint32_t								grid_copy_row_calc			(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SRectangle2D<_tCoord>& dstRect, uint32_t xDstOffset)		{
 		return (uint32_t)::llc::min	// Make sure everything is in range.
 			( ::llc::min
-				( (int32_t)src.width()
-				, ::llc::max(0, (int32_t)(dst.width() - xDstOffset))
+				( (int32_t)src.metrics().x
+				, ::llc::max(0, (int32_t)(dst.metrics().x - xDstOffset))
 				)
 			, (int32_t)dstRect.Size.x);
 	}
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy_alpha				(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SRectangle2D<_tCoord>& dstRect, const _tCell& comparand)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
-		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.height());
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.metrics().x);			// 
+		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src, dstRect, xDstOffset);	// 
 		uint32_t														elementsCopied				= 0;
-		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
+		for(int32_t ySrc = 0, yMax = (int32_t)src.metrics().y; ySrc < yMax; ++ySrc) {
 			const int32_t													yDst						= ySrc + (int32_t)dstRect.Offset.y;
 			if(yDst < 0)
 				continue;
@@ -249,11 +249,11 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy					(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SRectangle2D<_tCoord>& dstRect)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
-		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.height());
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.metrics().x);			// 
+		const int32_t													yDstLimit					= ::llc::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src, dstRect, xDstOffset);	// 
 		uint32_t														elementsCopied				= 0;
-		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
+		for(int32_t ySrc = 0, yMax = (int32_t)src.metrics().y; ySrc < yMax; ++ySrc) {
 			const int32_t													yDst						= ySrc + (int32_t)dstRect.Offset.y;
 			if(yDst < 0)
 				continue;
@@ -267,21 +267,21 @@ namespace llc
 
 	template<typename _tCell>
 						uint32_t								grid_copy_row_calc			(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, uint32_t xDstOffset, uint32_t xSrcOffset)		{
-		return ::llc::max(0, (int32_t)::llc::min((int32_t)src.width() - xSrcOffset, (int32_t)dst.width() - xDstOffset));	// Make sure everything is in range.
+		return ::llc::max(0, (int32_t)::llc::min((int32_t)src.metrics().x - xSrcOffset, (int32_t)dst.metrics().x - xDstOffset));	// Make sure everything is in range.
 	}
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy					(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const ::llc::SCoord2<_tCoord>& srcOffset)		{
-		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x, 0, (int32_t)dst.width());			// 
-		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcOffset.x, 0, (int32_t)src.width());			// 
+		const uint32_t													xDstOffset					= (uint32_t)::llc::clamp((int32_t)dstOffset.x, 0, (int32_t)dst.metrics().x);			// 
+		const uint32_t													xSrcOffset					= (uint32_t)::llc::clamp((int32_t)srcOffset.x, 0, (int32_t)src.metrics().x);			// 
 		const uint32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src, xDstOffset, xSrcOffset);	// 
 		uint32_t														elementsCopied				= 0;
-		for(int32_t y = 0, yMax = (int32_t)src.height(); y < yMax; ++y) {
+		for(int32_t y = 0, yMax = (int32_t)src.metrics().y; y < yMax; ++y) {
 			const int32_t													yDst						= y + (int32_t)dstOffset.y;
 			const int32_t													ySrc						= y + (int32_t)srcOffset.y;
 			if(yDst < 0 || ySrc < 0)
 				continue;
-			if(yDst >= (int32_t)dst.height() || ySrc >= (int32_t)src.height()) 
+			if(yDst >= (int32_t)dst.metrics().y || ySrc >= (int32_t)src.metrics().y) 
 				break;
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);	// memcpy the row from src to dst.
 			elementsCopied												+= xCopyCells;
@@ -291,19 +291,19 @@ namespace llc
 
 	template<typename _tCell>
 						uint32_t								grid_copy_row_calc			(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, uint32_t xDstOffset)		{
-		return (uint32_t)::llc::max(0, (int32_t)::llc::min((int32_t)src.width(), (int32_t)dst.width() - (int32_t)xDstOffset));
+		return (uint32_t)::llc::max(0, (int32_t)::llc::min((int32_t)src.metrics().x, (int32_t)dst.metrics().x - (int32_t)xDstOffset));
 	}
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy					(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SCoord2<_tCoord>& dstOffset)		{
-		const int32_t													xDstOffset					= (int32_t)::llc::clamp(0, (int32_t)dstOffset.x, (int32_t)dst.width());			// 
+		const int32_t													xDstOffset					= (int32_t)::llc::clamp(0, (int32_t)dstOffset.x, (int32_t)dst.metrics().x);			// 
 		const int32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src, xDstOffset);	// 
 		uint32_t														elementsCopied				= 0;
-		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
+		for(int32_t ySrc = 0, yMax = (int32_t)src.metrics().y; ySrc < yMax; ++ySrc) {
 			const int32_t													yDst						= ySrc + (int32_t)dstOffset.y;
 			if(yDst < 0) 
 				continue;
-			if(yDst >= (int32_t)dst.height()) 
+			if(yDst >= (int32_t)dst.metrics().y) 
 				break;
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][0], sizeof(_tCell) * xCopyCells);
 			elementsCopied												+= xCopyCells;
@@ -313,17 +313,17 @@ namespace llc
 
 	template<typename _tCell, typename _tCoord>
 						::llc::error_t							grid_copy_alpha				(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src, const ::llc::SCoord2<_tCoord>& dstOffset, const _tCell& comparand)		{
-		const int32_t													xDstOffset					= ::llc::min((int32_t)dstOffset.x, (int32_t)dst.width());			// 
+		const int32_t													xDstOffset					= ::llc::min((int32_t)dstOffset.x, (int32_t)dst.metrics().x);			// 
 		const int32_t													xCopyCells					= ::llc::grid_copy_row_calc(dst, src, xDstOffset);	// 
 		uint32_t														elementsCopied				= 0;
-		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
+		for(int32_t ySrc = 0, yMax = (int32_t)src.metrics().y; ySrc < yMax; ++ySrc) {
 			const int32_t													yDst						= ySrc + (int32_t)dstOffset.y;
 			if(yDst < 0) 
 				continue;
-			if(yDst >= (int32_t)dst.height()) 
+			if(yDst >= (int32_t)dst.metrics().y) 
 				break;
 			for(int32_t x = 0, xStop = xCopyCells; x < xStop; ++x) {
-				if((x + xDstOffset) >= (int32_t)dst.width())
+				if((x + xDstOffset) >= (int32_t)dst.metrics().x)
 					break;
 				if((x + xDstOffset) < 0)
 					continue;
@@ -337,7 +337,7 @@ namespace llc
 
 	template<typename _tCell>
 						::llc::error_t							grid_copy					(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src)		{
-		const uint32_t													yCopyRows					= ::llc::min(dst.height(), src.height());
+		const uint32_t													yCopyRows					= ::llc::min(dst.metrics().y, src.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::min(dst.width (), src.width ());
 		for(uint32_t y = 0; y < yCopyRows; ++y) 
 			memcpy(&dst[y][0], &src[y][0], sizeof(_tCell) * xCopyCells);
@@ -346,9 +346,9 @@ namespace llc
 
 	template<typename _tCell>
 						::llc::error_t							grid_mirror_x				(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src)		{
-		const uint32_t													yCopyRows					= ::llc::min(dst.height(), src.height());
+		const uint32_t													yCopyRows					= ::llc::min(dst.metrics().y, src.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::min(dst.width (), src.width ());
-		uint32_t														srcMaxX						= src.width() - 1;
+		uint32_t														srcMaxX						= src.metrics().x - 1;
 		for(uint32_t y = 0; y < yCopyRows; ++y) 
 		for(uint32_t x = 0; x < xCopyCells; ++x) 
 			dst[y][x]													= src[y][srcMaxX - x];
@@ -357,9 +357,9 @@ namespace llc
 
 	template<typename _tCell>
 						::llc::error_t							grid_mirror_y				(::llc::grid_view<_tCell>& dst, const ::llc::grid_view<_tCell>& src)		{
-		const uint32_t													yCopyRows					= ::llc::min(dst.height(), src.height());
+		const uint32_t													yCopyRows					= ::llc::min(dst.metrics().y, src.metrics().y);
 		const uint32_t													xCopyCells					= ::llc::min(dst.width (), src.width ());
-		uint32_t														srcMaxY						= src.height() - 1;
+		uint32_t														srcMaxY						= src.metrics().y - 1;
 		for(uint32_t y = 0; y < yCopyRows; ++y) 
 			memcpy(&dst[y][0], &src[srcMaxY - y][0], sizeof(_tCell) * xCopyCells);
 		return xCopyCells * yCopyRows;

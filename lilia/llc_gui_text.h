@@ -25,7 +25,7 @@ namespace llc
 			int32_t																				coordTableY										= text0[iChar] / characterCellsX;
 			const ::llc::SCoord2<int32_t>														coordCharTable									= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
 			const ::llc::SCoord2<int32_t>														dstOffset1										= {sizeCharCell.x * iChar, dstOffsetY};
-			const ::llc::SRectangle2D<int32_t>													srcRect0										= ::llc::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
+			const ::llc::SRectangle2D<int32_t>													srcRect0										= ::llc::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.metrics().y - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
 			error_if(errored(::llc::grid_copy_alpha(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0, {0xFF, 0x00, 0xFF, 0xFF})), "I believe this never fails.");
 			//error_if(errored(::llc::grid_copy(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
 		}
