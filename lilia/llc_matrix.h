@@ -10,16 +10,17 @@ namespace llc
 	template<typename _tBase>
 	struct SMatrix4 {
 		typedef				SMatrix4<_tBase>	_tMat4, TMatrix4;
-		typedef				SCoord3<_tBase>		_TCoord3;
+		typedef				SCoord3<_tBase>		TCoord3;
 							_tBase				_11, _12, _13, _14
 								,				_21, _22, _23, _24
 								,				_31, _32, _33, _34
 								,				_41, _42, _43, _44
 								;
 
-		//inline				const _tBase&		operator[]					(uint32_t index)																const				{ throw_if(index > 15, "", "Invalid matrix element index: %u", index); return *((&_11)[index]); }
-		//inline				_tBase&				operator[]					(uint32_t index)																					{ throw_if(index > 15, "", "Invalid matrix element index: %u", index); return *((&_11)[index]); }
-
+		//inline				const _tBase&		operator[]					(uint32_t index)																const				{ return ()&_11;//throw_if(index > 15, "", "Invalid matrix element index: %u", index); return *((&_11)[index]); }
+		//inline				_tBase&				operator[]					(uint32_t index)																					{ return ()&_11;//throw_if(index > 15, "", "Invalid matrix element index: %u", index); return *((&_11)[index]); }
+		
+		inline				TCoord3&			operator[]					(uint32_t index)																					{ return *(TCoord3*)((&_11) + 4 * index); }		//throw_if(index > 15, "", "Invalid matrix element index: %u", index); return *((&_11)[index]); }
 		constexpr			bool				operator ==					(const _tMat4& other)															const	noexcept	{ return _11 == other._11 && _12 == other._12 && _13 == other._13 && _14 == other._14 && _21 == other._21 && _22 == other._22 && _23 == other._23 && _24 == other._24 && _31 == other._31 && _32 == other._32 && _33 == other._33 && _34 == other._34 && _41 == other._41 && _42 == other._42 && _43 == other._43 && _44 == other._44; }
 		constexpr inline	bool				operator !=					(const _tMat4& other)															const	noexcept	{ return !operator==(other); }
 
@@ -47,11 +48,11 @@ namespace llc
 		inline				void				Invert						()																									{ *this = GetInverse();		}
 
 		inline				_tMat4&				LinearInterpolate			(const _tMat4&p, const _tMat4&q, double fTime)											noexcept	{ return *this = ((q-p)*fTime)+p; }
-		constexpr			_TCoord3			InverseTranslate			(const _TCoord3& vec)															const	noexcept	{ return { vec.x - _41, vec.y - _42, vec.z - _43 }; }
-							void				InverseTranslateInPlace		(_TCoord3& fpVec)																const	noexcept	{ vec.x -= _41; vec.y -= _42; vec.z -= _43; }
-		constexpr			_TCoord3			Transform					(const _TCoord3& v)																const				{
+		constexpr			TCoord3				InverseTranslate			(const TCoord3& vec)															const	noexcept	{ return { vec.x - _41, vec.y - _42, vec.z - _43 }; }
+							void				InverseTranslateInPlace		(TCoord3& fpVec)																const	noexcept	{ vec.x -= _41; vec.y -= _42; vec.z -= _43; }
+		constexpr			TCoord3				Transform					(const TCoord3& v)																const				{
 			return 
-			_TCoord3
+			TCoord3
 				{	(v.x*_11 + v.y*_21 + v.z*_31 + _41)	// x
 				,	(v.x*_12 + v.y*_22 + v.z*_32 + _42)	// y
 				,	(v.x*_13 + v.y*_23 + v.z*_33 + _43)	// z
@@ -59,14 +60,14 @@ namespace llc
 				/	(v.x*_14 + v.y*_24 + v.z*_34 + _44)	// w
 			;
 		}
-		constexpr			_TCoord3			TransformDirection			(const _TCoord3& vector)														const	noexcept	{
+		constexpr			TCoord3				TransformDirection			(const TCoord3& vector)														const	noexcept	{
 			return 
 				{	vector.x * _11 + vector.y * _21 + vector.z * _31
 				,	vector.x * _12 + vector.y * _22 + vector.z * _32
 				,	vector.x * _13 + vector.y * _23 + vector.z * _33
 				};
 		}
-		constexpr			_TCoord3			TransformInverseDirection	(const _TCoord3& _v)															const	noexcept	{
+		constexpr			TCoord3				TransformInverseDirection	(const TCoord3& _v)															const	noexcept	{
 			return	
 				{	_v.x * _11 + _v.y * _12 + _v.z * _13 
 				,	_v.x * _21 + _v.y * _22 + _v.z * _23
@@ -74,8 +75,8 @@ namespace llc
 				};
 		} 
 		//- Rotate avector using the inverse of the matrix
-		//inline				void				InverseRotateInPlace	(_TCoord3& vector)				const			{ fpVec = InverseRotate(vector); }
-		//					_TCoord3				InverseRotate			(const _TCoord3& fpVec)			const
+		//inline				void				InverseRotateInPlace	(TCoord3& vector)				const			{ fpVec = InverseRotate(vector); }
+		//						TCoord3				InverseRotate			(const TCoord3& fpVec)			const
 		//{
 		//	return 
 		//	{	fpVec.x * _11 + fpVec.y * _21 + fpVec.z * _31
@@ -123,7 +124,7 @@ namespace llc
 			_41 = _42 = _43 = _14 = _24 = _34 = (_tBase)0; _44 = (_tBase)1;
 		}
 							void				Scale						(_tBase x, _tBase y, _tBase z, bool bEraseContent)										noexcept	{ Scale({x, y, z}, bEraseContent); }
-		inline				void				Scale						(const _TCoord3& ypr, bool bEraseContent)												noexcept
+		inline				void				Scale						(const TCoord3& ypr, bool bEraseContent)												noexcept
 		{ 
 			if( bEraseContent ) {
 				_11 = (_tBase)ypr.x;	_12 =					_13 =					_14 = 
@@ -135,7 +136,7 @@ namespace llc
 				_11 = (_tBase)(_11*ypr.x); _22 = (_tBase)(_22*ypr.y); _33 = (_tBase)(_33*ypr.z);
 			}
 		}
-							void				SetTranslation				(const _TCoord3& vTranslation, bool bEraseContent)										noexcept	{
+							void				SetTranslation				(const TCoord3& vTranslation, bool bEraseContent)										noexcept	{
 			if( bEraseContent ) {
 				_11 = (_tBase)1;	_12 =				_13 =				_14 = 
 				_21 = (_tBase)0;	_22 = (_tBase)1;	_23 =				_24 = 
@@ -155,10 +156,10 @@ namespace llc
 			_12 = _13 = _14 = _21 = _23 = _24 = _31 = _32 = _41 = _42 = _44 = (_tBase)0;
 		//	return *this;
 		} // FoV
-							void				LookAt						(const _TCoord3& vPosition, const _TCoord3& vTarget, const _TCoord3& vUp)							{
-			_TCoord3									F							= _TCoord3{vTarget - vPosition}.Normalize();
-			_TCoord3									R							= vUp	.Cross(F)		.Normalize();
-			_TCoord3									U							= F		.Cross(R)		.Normalize();
+							void				LookAt						(const TCoord3& vPosition, const TCoord3& vTarget, const TCoord3& vUp)							{
+			TCoord3										F							= TCoord3{vTarget - vPosition}.Normalize();
+			TCoord3										R							= vUp	.Cross(F)		.Normalize();
+			TCoord3										U							= F		.Cross(R)		.Normalize();
 
 			_11 = R.x;	_12 = U.x;	_13 = F.x;	_14 = (_tBase)0;
 			_21 = R.y;	_22 = U.y;	_23 = F.y;	_24 = (_tBase)0;
@@ -169,7 +170,7 @@ namespace llc
 			_44 = (_tBase)1;
 		}
 
-							void				View3D						(const _TCoord3& vPosition, const _TCoord3& vRight, const _TCoord3& vUp, const _TCoord3& vFront)	{
+							void				View3D						(const TCoord3& vPosition, const TCoord3& vRight, const TCoord3& vUp, const TCoord3& vFront)	{
 			_11 = vRight.x;	_12 = vUp.x; _13 = vFront.x; _14 = (_tBase)0;
 			_21 = vRight.y;	_22 = vUp.y; _23 = vFront.y; _24 = (_tBase)0;
 			_31 = vRight.z;	_32 = vUp.z; _33 = vFront.z; _34 = (_tBase)0;
@@ -178,8 +179,8 @@ namespace llc
 			_43 = (_tBase)-vPosition.Dot(vFront	);	
 			_44 = (_tBase)1;
 		}
-							void				Billboard					(const _TCoord3& vPos, const _TCoord3& vDir, const _TCoord3& vWorldUp)								{
-			_TCoord3									vUp
+							void				Billboard					(const TCoord3& vPos, const TCoord3& vDir, const TCoord3& vWorldUp)								{
+			TCoord3										vUp
 				,										vRight
 				; 
 			double										fAngle						= vWorldUp.Dot(vDir);
@@ -192,7 +193,7 @@ namespace llc
 			_41 = vPos.x;	_42 = vPos.y;	_43 = vPos.z;	_44=(_tBase)1;
 		} // Billboard
 		inline				void				Rotation					(_tBase x, _tBase y, _tBase z)																		{ return Rotation({x, y, z}); }
-							void				Rotation					(const _TCoord3 &vc)																				{
+							void				Rotation					(const TCoord3 &vc)																					{
 			::llc::SPairSinCos							yaw							= ::llc::getSinCos(vc.z);
 			::llc::SPairSinCos							pitch						= ::llc::getSinCos(vc.y);
 			::llc::SPairSinCos							roll						= ::llc::getSinCos(vc.x);
@@ -212,9 +213,10 @@ namespace llc
 
 		//	return *this;
 		} // Rota
-							void				RotationArbitraryAxis		(const _TCoord3& _vcAxis, _tBase a)																	{
+
+							void				RotationArbitraryAxis		(const TCoord3& _vcAxis, _tBase a)																		{
 			::llc::SPairSinCos							pairSinCos					= ::llc::getSinCos(a);
-			_TCoord3									vcAxis						= _vcAxis;
+			TCoord3										vcAxis						= _vcAxis;
 			double										fSum						= 1.0 - pairSinCos.Cos;
    
 			if( vcAxis.LengthSquared() != 1.0 )
@@ -274,7 +276,7 @@ namespace llc
 
 
 		constexpr			_tMat4				GetTranspose				()																				const	noexcept	{ return {_11, _21, _31, _41,  _12, _22, _32, _42,  _13, _23, _33, _43,  _14, _24, _34, _44};	}
-		inline constexpr	_TCoord3			GetTranslation				()																				const	noexcept	{ return { _41, _42, _43 }; }
+		inline constexpr	TCoord3				GetTranslation				()																				const	noexcept	{ return { _41, _42, _43 }; }
 							_tMat4				GetInverse					()																				const				{
 			_tMat4										mTranspose					= GetTranspose()
 				,										mResult						= *this

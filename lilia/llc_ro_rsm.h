@@ -81,6 +81,12 @@ namespace llc
 					int32_t													RSMNodeIndex	;
 					//::llc::array_pod<int32_t>								SkinIndices		; // one per triangle (VertexIndices.size() / 3)
 	};
+
+	struct SModelHierarchyNodeRSM {
+					int32_t													IdParent		;
+					::llc::array_pod<int32_t>								IdChildren		;
+	};
+
 				::llc::error_t											rsmGeometryGenerate						(const ::llc::SRSMFileContents& input, ::llc::array_view<::llc::SModelNodeRSM>& out_generated);
 } // namespace
 

@@ -148,7 +148,7 @@ static		::llc::error_t								rsmReadPositionKeyframes									(::llc::stream_vi
 				}
 			}
 		}
-
+		//1C1SQJL_esAR795AR795
 		{ // Read Triangle descriptions (vertex/UV indices, texture and other properties)
 			uint32_t													faceCount													= 0;			// Get the number of face
 			rsm_stream.read_pod(faceCount);

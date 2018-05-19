@@ -42,8 +42,8 @@ namespace llc
 	struct STextureMonochrome {
 		typedef				_tTexel												TTexel;
 
-							::llc::array_pod		<_tTexel>					Texels										;
-							::llc::bit_view	<_tTexel>					View										;
+							::llc::array_pod<_tTexel>							Texels										;
+							::llc::bit_view	<_tTexel>							View										;
 							uint32_t											Pitch										= 0;
 
 		constexpr																STextureMonochrome							()													= default;
