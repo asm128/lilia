@@ -1,6 +1,7 @@
 #include "llc_math.h"
 #include "llc_bit.h"
 #include "llc_eval.h"
+#include "llc_log.h"
 
 #ifndef LLC_COORD_H_928374982364923322
 #define LLC_COORD_H_928374982364923322
