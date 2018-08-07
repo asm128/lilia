@@ -123,7 +123,7 @@ namespace llc
 
 	template<typename _tCoord, typename _tColor>
 	static					::llc::error_t									drawCircle									(const ::llc::SCoord2<uint32_t>& targetMetrics, const ::llc::SCircle2D<_tCoord>& circle, ::llc::array_pod<::llc::SCoord2<int32_t>>& out_Points)			{
-		int32_t																		xStop										= ::llc::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.metrics().x);
+		int32_t																		xStop										= ::llc::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)targetMetrics.x);
 		double																		radiusSquared								= circle.Radius * circle.Radius;
 		int32_t																		pixelsDrawn									= 0;
 		for(int32_t y = ::llc::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::llc::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)targetMetrics.y); y < yStop; ++y)

@@ -71,7 +71,6 @@
     <ClCompile Include="llc_geometry.cpp" />
     <ClCompile Include="llc_ro_gnd.cpp" />
     <ClCompile Include="llc_gui.cpp" />
-    <ClCompile Include="llc_gui_text.cpp" />
     <ClCompile Include="llc_ro_rsw.cpp" />
     <ClCompile Include="llc_ro_rsm.cpp" />
     <ClCompile Include="llc_timer.cpp" />

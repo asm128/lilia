@@ -3,6 +3,7 @@
 #include <malloc.h>
 //#include "llc_safe.h"
 #include "llc_auto_handler.h"
+#include <memory.h>
 
 #ifndef LLC_MEMORY_H__92836409283642038462309846
 #define LLC_MEMORY_H__92836409283642038462309846

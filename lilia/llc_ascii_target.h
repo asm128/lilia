@@ -24,7 +24,7 @@ namespace llc
 							::llc::error_t									asciiTargetClear							(::llc::SASCIITarget& target, uint8_t character = ' ', uint16_t color = ASCII_COLOR_WHITE);
 
 	template<typename _tUnit>
-	static inline			::llc::error_t									asciiTargetCreate							(::llc::SASCIITarget& target, const ::llc::SCoord2<_tUnit>& size)						{ return ::llc::asciiTargetCreate(console, (uint32_t)size.x, (uint32_t)size.y); }
+	static inline			::llc::error_t									asciiTargetCreate							(::llc::SASCIITarget& target, const ::llc::SCoord2<_tUnit>& size)						{ return ::llc::asciiTargetCreate(target, (uint32_t)size.x, (uint32_t)size.y); }
 
 	// ------------------------------------------------------ 
 #pragma pack( push, 1 )
