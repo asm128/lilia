@@ -239,8 +239,8 @@ namespace llc
 			if(depth > 1 || depth < 0) // discard from depth planes
 				continue;
 			uint32_t																	finalDepth									= (uint32_t)(depth * 0x00FFFFFFU);
-			if (targetDepth[(uint32_t)y][(uint32_t)x] > (uint32_t)finalDepth) { // check against depth buffer
-				targetDepth[(uint32_t)y][(uint32_t)x]									= finalDepth;
+			if (targetDepth[(uint32_t)y].begin()[(uint32_t)x] > (uint32_t)finalDepth) { // check against depth buffer
+				targetDepth[(uint32_t)y].begin()[(uint32_t)x]									= finalDepth;
 				triangleWeigths.push_back(proportions);
 				out_Points.push_back(cellCurrent);
 				++pixelsDrawn;
