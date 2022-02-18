@@ -1,6 +1,7 @@
 #include "llc_texture.h"
 #include "llc_color.h"
 #include "llc_coord.h"
+#include "llc_grid_scale.h"
 #include <memory> // this is required for ::std::swap()
 
 #ifndef BITMAP_TARGET_H_98237498023745654654
